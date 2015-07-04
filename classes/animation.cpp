@@ -1,12 +1,7 @@
-#include <SFML/Graphics.hpp>
-#include <Box2D/Box2D.h>
-#include <vector>
-
-class animation {
+#include "animation.h"
 
 
-  public:
-    animation(std::vector<sf::Sprite> sprites, int delay) {
+  animation::animation(std::vector<sf::Texture> sprites, int delay) {
     this->frameDelay = delay;
     this->stopped = true;
     this->spriteList = sprites;
@@ -14,9 +9,9 @@ class animation {
     this->currentFrame= 0;
     this->animationDirection=0;
     this->totalFrames=sprites.size();
-  };
+  }
 
-  void start() {
+  void animation::start() {
         if (!stopped) {
             return;
         }
@@ -28,7 +23,7 @@ class animation {
         stopped = false;
     }
 
-    void stop() {
+    void animation::stop() {
         if (spriteList.size() == 0) {
             return;
         }
@@ -36,7 +31,7 @@ class animation {
         stopped = true;
     }
 
-    void restart() {
+    void animation::restart() {
         if (spriteList.size() == 0) {
             return;
         }
@@ -45,17 +40,17 @@ class animation {
         currentFrame = 0;
     }
 
-    void reset() {
+    void animation::reset() {
         this->stopped = true;
         this->frameCount = 0;
         this->currentFrame = 0;
     }
 
-    sf::Sprite getSprite() {
+    sf::Texture animation::getTexture() {
       return spriteList[currentFrame];
     }
 
-    void update() {
+    void animation::update() {
       if (!stopped) {
             frameCount++;
 
@@ -72,16 +67,3 @@ class animation {
             }
         }
     }
-
-  private:
-    int frameCount;
-    int frameDelay;
-    int currentFrame;
-    int animationDirection;
-    int totalFrames;
-
-    bool stopped;
-
-    std::vector<sf::Sprite> spriteList;
-
-};
