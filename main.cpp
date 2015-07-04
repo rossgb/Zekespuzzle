@@ -17,6 +17,7 @@ int main()
     /** Prepare the window */
     sf::RenderWindow Window(sf::VideoMode(800, 600, 32), "Test");
     Window.setFramerateLimit(60);
+		Window.setKeyRepeatEnabled(false);
 
     /** Prepare the world */
     b2Vec2 Gravity(0.f, 9.8f);
@@ -33,7 +34,7 @@ int main()
 		//PUT INTO OTHER FILE----------
 
 		Player player(World);
-		
+
     //END RAGE---------------------
 
     while (Window.isOpen())
@@ -47,6 +48,8 @@ int main()
         World.Step(1/60.f, 8, 3);
 
         Window.clear(sf::Color::White);
+
+				player.update(Window);
 
         int BodyCount = 0;
         for (b2Body* BodyIterator = World.GetBodyList(); BodyIterator != 0; BodyIterator = BodyIterator->GetNext())

@@ -9,7 +9,6 @@
 
 class animation {
 public:
-  animation();
   animation(std::vector<sf::Texture> sprites, int delay);
 
   void start();
