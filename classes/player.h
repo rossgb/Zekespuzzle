@@ -8,13 +8,14 @@
 #include "animation.h"
 
 enum StateMask {
-    NONE    = 0x0,
-    LEFT    = 0x1,
-    RIGHT   = 0x2,
-    UP      = 0x4,
-    DOWN    = 0x8,
-    SPACE   = 0x10,
-    INAIR   = 0x20
+    NONE      = 0x0,
+    LEFT      = 0x1,
+    RIGHT     = 0x2,
+    UP        = 0x4,
+    DOWN      = 0x8,
+    SPACE     = 0x10,
+    INAIR     = 0x20,
+    ATTACKING = 0x40
 };
 
 class Player {
