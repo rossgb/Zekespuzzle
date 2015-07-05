@@ -27,54 +27,18 @@ int main()
     /** Prepare textures */
     sf::Texture GroundTexture;
     sf::Texture BoxTexture;
-    // GroundTexture.loadFromFile("MainSprites/ground/groundtiles_0001_Layer-6.png");
-    // BoxTexture.loadFromFile("MainSprites/basic/idle.png");
-
-
-		//PUT INTO OTHER FILE----------
 
 		Player player(World);
 
-    //END RAGE---------------------
-
     while (Window.isOpen())
     {
-        // if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        // {
-        //     int MouseX = sf::Mouse::getPosition(Window).x;
-        //     int MouseY = sf::Mouse::getPosition(Window).y;
-        //     std::cout << sf::Mouse::getPosition(Window).y << std::endl;
-        //     CreateBox(World, MouseX, MouseY);
-        // }
+
         World.Step(1/60.f, 8, 3);
 
         Window.clear(sf::Color::White);
 
 				player.update(Window);
 
-        // int BodyCount = 0;
-        // for (b2Body* BodyIterator = World.GetBodyList(); BodyIterator != 0; BodyIterator = BodyIterator->GetNext())
-        // {
-        //     if (BodyIterator->GetType() == b2_dynamicBody)
-        //     {
-        //         sf::Sprite Sprite;
-        //         Sprite.setTexture(BoxTexture);
-        //         Sprite.setOrigin(16.f, 16.f);
-        //         Sprite.setPosition(SCALE * BodyIterator->GetPosition().x, SCALE * BodyIterator->GetPosition().y);
-        //         Sprite.setRotation(BodyIterator->GetAngle() * 180/b2_pi);
-        //         Window.draw(Sprite);
-        //         ++BodyCount;
-        //     }
-        //     else
-        //     {
-        //         sf::Sprite GroundSprite;
-        //         GroundSprite.setTexture(GroundTexture);
-        //         GroundSprite.setOrigin(400.f, 8.f);
-        //         GroundSprite.setPosition(BodyIterator->GetPosition().x * SCALE, BodyIterator->GetPosition().y * SCALE);
-        //         GroundSprite.setRotation(180/b2_pi * BodyIterator->GetAngle());
-        //         Window.draw(GroundSprite);
-        //     }
-        // }
         Window.display();
     }
 

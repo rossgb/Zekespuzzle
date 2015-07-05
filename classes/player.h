@@ -1,5 +1,5 @@
 #ifndef PLAYER_H
-#define  PLAYER_H
+#define PLAYER_H
 #endif
 
 #include <Box2D/Box2D.h>
@@ -48,4 +48,7 @@ private:
   void handlePhysics();                           //handles movement based on states
   void handleAnimation(sf::RenderWindow &Window); //gets the texture from the animator based on the state
   animation* currentAnimation;
+
+  int* numFootContacts;
+
 };

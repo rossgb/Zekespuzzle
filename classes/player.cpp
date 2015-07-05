@@ -1,40 +1,41 @@
 #include "player.h"
 #include "iostream"
+#include <stdlib.h>
 
 static const float SCALE = 30.f;
 
-
 Player::Player(b2World& World) {
-  b2BodyDef bodyDef;
-  bodyDef.type = b2_dynamicBody; //this will be a dynamic body
-  bodyDef.position.Set(5, 5); //set the starting position
-  bodyDef.angle = 0; //set the starting angle
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody; //this will be a dynamic body
+    bodyDef.position.Set(5, 5); //set the starting position
+    bodyDef.angle = 0; //set the starting angle
+    bodyDef.fixedRotation = true;
 
-  rising = new animation("jump1");
-  falling = new animation("jump2");
-  standing = new animation("idle");
-  hanging = new animation("hang");
+    rising = new animation("jump1");
+    falling = new animation("jump2");
+    standing = new animation("idle");
+    hanging = new animation("hang");
 
 
-   walkLeft = new animation("walk/walkframes", 10, 6);
-   walkRight = new animation("walk/walkframes", 10, 6);
-   slashLeft = new animation("slash/slashframes", 4, 6);
-   slashRight = new animation("slash/slashframes", 4, 6);
-   slashRight = new animation("boom/boomframes", 9, 4);
+    walkLeft = new animation("walk/walkframes", 10, 6);
+    walkRight = new animation("walk/walkframes", 10, 6);
+    slashLeft = new animation("slash/slashframes", 4, 6);
+    slashRight = new animation("slash/slashframes", 4, 6);
+    slashRight = new animation("boom/boomframes", 9, 4);
+    currentAnimation = walkLeft;
+    currentAnimation->start();
 
-currentAnimation = walkLeft;
-currentAnimation->start();
+    this->body = World.CreateBody(&bodyDef);
 
-  this->body = World.CreateBody(&bodyDef);
+    b2PolygonShape Shape;
+    Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
+    b2FixtureDef FixtureDef;
+    FixtureDef.density = 1.f;
+    FixtureDef.friction = 0.7f;
+    FixtureDef.shape = &Shape;
+    this->body->CreateFixture(&FixtureDef);
 
-  b2PolygonShape Shape;
-  Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
-  b2FixtureDef FixtureDef;
-  FixtureDef.density = 1.f;
-  FixtureDef.friction = 0.7f;
-  FixtureDef.shape = &Shape;
-  this->body->CreateFixture(&FixtureDef);
-  this->state = NONE;
+    this->state = NONE;
 }
 Player::~Player() {}
 
@@ -44,9 +45,9 @@ void Player::update(sf::RenderWindow &Window) {
 
   handleKeyboard(Window);
 
-  handleState();
-
   handlePhysics();
+
+  handleState();
 
   //get textures from animator and render it to the players position
   handleAnimation(Window);
@@ -55,7 +56,30 @@ void Player::update(sf::RenderWindow &Window) {
 
 
 void Player::handlePhysics() {
+    std::cout << state << std::endl;
+    if (this->body->GetLinearVelocity().y == 0 && (state & INAIR)) {
+        std::cout << "landed";
+        state -= INAIR;
+    }
 
+    if (abs(this->body->GetLinearVelocity().y) > 0.1 && !(state & INAIR)) {
+        std::cout << "un-landed";
+        state += INAIR;
+    }
+
+    if (state & INAIR) {
+      if (this->body->GetLinearVelocity().y > 0) {
+
+      } else {
+
+      }
+    }
+
+    if (!(this->state & INAIR) && (this->state & UP)) {
+        std::cout << "jump" << std::endl;
+        this->state += INAIR;
+        this->body->ApplyLinearImpulse( b2Vec2(0,-5), this->body->GetWorldCenter());
+    }
 }
 
 void Player::handleAnimation(sf::RenderWindow &Window) {
@@ -68,14 +92,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
 }
 
 void Player::handleState() {
-    if (this->state & INAIR == 0 && this->state & UP) {
-        this->state += JUMPING;
-        this->state += INAIR;
-    }
 
-    if (this->state & JUMPING) {
-        this->body->ApplyLinearImpulse( b2Vec2(0,50), this->body->GetWorldCenter());
-    }
 }
 
 void Player::handleKeyboard(sf::RenderWindow &Window) {
