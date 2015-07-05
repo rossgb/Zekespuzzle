@@ -16,8 +16,16 @@ enum StateMask {
     SPACE     = 0x10,
     INAIR     = 0x20,
     ATTACKING = 0x40,
-    JUMPED    = 0x80
+    JUMPED    = 0x80,
+    NOVA      = 0x100,
+    X         = 0x200,
+    POSED     = 0x400,
+    THROWN    = 0x800,
+    RETURN    = 0x1000
+
 };
+
+
 
 class Player {
 public:
@@ -27,19 +35,28 @@ public:
   void update(sf::RenderWindow &Window);
 
   b2Body* body;
+  b2Body* hoop;
   int i;
   sf::Sprite sprite;
   sf::Sprite hoopbacksp;
   sf::Sprite hoopfrontsp;
   int state;
 
+    //debug
+    int counter;
+    bool debug;
+    void debugPrints();
+    //debug
 
 private:
+  int novacounter;
   float lastx;
   float lasty;
+  b2Vec2 hooporigin;
 
   sf::Texture hoopback;
   sf::Texture hoopfront;
+  sf::Texture hoopflat;
 
   animation* rising;
   animation* falling;
@@ -51,6 +68,7 @@ private:
   animation* slashLeft;
   animation* slashRight;
   animation* nova;
+
 
   void handleKeyboard(sf::RenderWindow &Window);  //sets the state based on keyboard input
   void handleState();                             //resolves conflicting states

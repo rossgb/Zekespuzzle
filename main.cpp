@@ -15,17 +15,18 @@ void CreateBox(b2World& World, int MouseX, int MouseY);
 int main()
 {
     /** Prepare the window */
-    sf::RenderWindow Window(sf::VideoMode(800, 600, 32), "Test");
+    sf::RenderWindow Window(sf::VideoMode(1300, 900, 32), "Test");
     Window.setFramerateLimit(60);
 		Window.setKeyRepeatEnabled(false);
 
     /** Prepare the world */
     b2Vec2 Gravity(0.f, 19.f);
     b2World World(Gravity, true);
-    CreateGround(World, 400.f, 500.f, 800.f, 16.f);
+    CreateGround(World, 600.f, 800.f, 1600.f, 16.f);
     CreateGround(World, 200.f, 250.f, 120.f, 20.f);
-
+    CreateGround(World, 300.f, 500.f, 120.f, 20.f);
     /** Prepare textures */
+
     sf::Texture GroundTexture;
     GroundTexture.loadFromFile("MainSprites/ground/groundtiles_0001_Layer-6.png");
     GroundTexture.setRepeated(true);
@@ -54,16 +55,19 @@ int main()
         Window.draw(ground);
 
         ground.setTexture(GroundTexture);
-        ground.setPosition(0.f,500.f);
-        sf::Rect<int> groundrect2 = sf::Rect<int>(0,0,1000,60);
+        ground.setPosition(0.f,800.f);
+        sf::Rect<int> groundrect2 = sf::Rect<int>(0,0,1600,60);
         ground.setTextureRect(groundrect2);
         Window.draw(ground);
 
-
+        ground.setTexture(GroundTexture);
+        ground.setPosition(240.f,500.f);
+        ground.setTextureRect(groundrect);
+        Window.draw(ground);
 
 
         ground.setTexture(GroundTexture2);
-        ground.setPosition(0.f,560.f);
+        ground.setPosition(0.f,860.f);
         ground.setTextureRect(groundrect2);
         Window.draw(ground);
 				player.update(Window);
