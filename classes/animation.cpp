@@ -6,7 +6,7 @@ animation::animation(std::string type) {
 
 
     std::stringstream sstm;
-    sstm << "MainSprites/basic" << type << ".png";
+    sstm << "MainSprites/basic/" << type << ".png";
     std::string result = sstm.str();
     sf::Texture* tex = new sf::Texture();
     tex->loadFromFile(result);
@@ -82,7 +82,6 @@ animation::animation(std::string type) {
     }
 
     sf::Texture* animation::getTexture() {
-      std::cout << currentFrame << std::endl;
       return &spriteList[currentFrame];
 
     }

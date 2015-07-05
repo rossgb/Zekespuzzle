@@ -1,14 +1,16 @@
 #include "player.h"
 #include "iostream"
+#include <stdlib.h>
 
 static const float SCALE = 30.f;
 
-
 Player::Player(b2World& World) {
+
   b2BodyDef bodyDef;
   bodyDef.type = b2_dynamicBody; //this will be a dynamic body
   bodyDef.position.Set(5, 5); //set the starting position
   bodyDef.angle = 0; //set the starting angle
+  bodyDef.fixedRotation = true;
 
   hoopfront.loadFromFile("MainSprites/basic/hoopfront.png");
   hoopback.loadFromFile("MainSprites/basic/hoopback.png");
@@ -40,6 +42,7 @@ currentAnimation->start();
   this->state = NONE;
   lastx=SCALE * this->body->GetPosition().x;
   lasty=SCALE * this->body->GetPosition().y;
+
 }
 Player::~Player() {}
 
@@ -49,20 +52,41 @@ void Player::update(sf::RenderWindow &Window) {
 
   handleKeyboard(Window);
 
-  handleState();
-
   handlePhysics();
+
+  handleState();
 
   //get textures from animator and render it to the players position
   handleAnimation(Window);
 
-  //logging
-  // std::cout<< this->body->GetPosition().y << std::endl;
 }
 
 
 void Player::handlePhysics() {
+    std::cout << state << std::endl;
+    if (this->body->GetLinearVelocity().y == 0 && (state & INAIR)) {
+        std::cout << "landed";
+        state -= INAIR;
+    }
 
+    if (abs(this->body->GetLinearVelocity().y) > 0.1 && !(state & INAIR)) {
+        std::cout << "un-landed";
+        state += INAIR;
+    }
+
+    if (state & INAIR) {
+      if (this->body->GetLinearVelocity().y > 0) {
+
+      } else {
+
+      }
+    }
+
+    if (!(this->state & INAIR) && (this->state & UP)) {
+        std::cout << "jump" << std::endl;
+        this->state += INAIR;
+        this->body->ApplyLinearImpulse( b2Vec2(0,-5), this->body->GetWorldCenter());
+    }
 }
 
 void Player::handleAnimation(sf::RenderWindow &Window) {
