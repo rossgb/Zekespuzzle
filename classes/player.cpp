@@ -98,7 +98,7 @@ void Player::update(sf::RenderWindow &Window) {
   handleAnimation(Window);
 
   //logging
-  std::cout<< this->body->GetPosition().x << std::endl;
+  std::cout<< this->body->GetPosition().t << std::endl;
 }
 
 
@@ -116,7 +116,14 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
 }
 
 void Player::handleState() {
+    if (this->state & INAIR == 0 && this->state & UP) {
+        this->state += JUMPING;
+        this->state += INAIR;
+    }
 
+    if (this->state & JUMPING) {
+        this->body->ApplyLinearImpulse( b2Vec2(0,50), this->body->GetWorldCenter());
+    }
 }
 
 void Player::handleKeyboard(sf::RenderWindow &Window) {
