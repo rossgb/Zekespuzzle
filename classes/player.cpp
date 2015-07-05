@@ -36,7 +36,7 @@ currentAnimation->start();
   Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
   b2FixtureDef FixtureDef;
   FixtureDef.density = 1.f;
-  FixtureDef.friction = 3.7f;
+  FixtureDef.friction = 5.f;
   FixtureDef.shape = &Shape;
   this->body->CreateFixture(&FixtureDef);
   this->state = NONE;
@@ -64,6 +64,9 @@ void Player::update(sf::RenderWindow &Window) {
 void Player::handlePhysics() {
     if (this->body->GetLinearVelocity().y == 0 && (state & INAIR)) {
         state -= INAIR;
+        if (state&JUMPED) {
+          state -= JUMPED;
+        }
     }
 
     if (abs(this->body->GetLinearVelocity().y) > 0.1 && !(state & INAIR)) {
@@ -86,12 +89,21 @@ void Player::handlePhysics() {
         this->body->ApplyLinearImpulse( b2Vec2(0,-17), this->body->GetWorldCenter());
         state -= UP;
     } else if ((state & INAIR) && (state & UP) && !(state & JUMPED)) {
-        this->body->ApplyLinearImpulse( b2Vec2(0,-7), this->body->GetWorldCenter());
+        this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
+        this->body->ApplyLinearImpulse( b2Vec2(0,-17), this->body->GetWorldCenter());
         state -= UP;
         state += JUMPED;
     } else if (state & UP) {
         state -= UP;
     }
+
+    if (this->body->GetLinearVelocity().x>10) {
+      this->body->SetLinearVelocity(b2Vec2(10,this->body->GetLinearVelocity().y));
+    }
+
+        if (this->body->GetLinearVelocity().x<-10) {
+          this->body->SetLinearVelocity(b2Vec2(-10,this->body->GetLinearVelocity().y));
+        }
 }
 
 void Player::handleAnimation(sf::RenderWindow &Window) {
@@ -134,11 +146,11 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   }
 sprite.setTexture(*currentAnimation->getTexture());
   if (state&SPACE) {
-    sprite.setOrigin(132.f, 30.f);
+    sprite.setOrigin(132.f, 39.f);
     sf::Rect<int> slashrect = sf::Rect<int>(0,0, 264,66);
     sprite.setTextureRect(slashrect);
   } else {
-    sprite.setOrigin(30.f, 30.f);
+    sprite.setOrigin(30.f, 39.f);
   }
   sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
   sprite.setRotation(this->body->GetAngle() * 180/b2_pi);
