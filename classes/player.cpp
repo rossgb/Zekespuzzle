@@ -36,7 +36,7 @@ currentAnimation->start();
   Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
   b2FixtureDef FixtureDef;
   FixtureDef.density = 1.f;
-  FixtureDef.friction = 0.7f;
+  FixtureDef.friction = 3.7f;
   FixtureDef.shape = &Shape;
   this->body->CreateFixture(&FixtureDef);
   this->state = NONE;
@@ -63,7 +63,6 @@ void Player::update(sf::RenderWindow &Window) {
 
 
 void Player::handlePhysics() {
-    std::cout << state << std::endl;
     if (this->body->GetLinearVelocity().y == 0 && (state & INAIR)) {
         std::cout << "landed";
         state -= INAIR;
@@ -74,12 +73,15 @@ void Player::handlePhysics() {
         state += INAIR;
     }
 
+    int force = 50;
     if (state & INAIR) {
-      if (this->body->GetLinearVelocity().y > 0) {
-
-      } else {
-
-      }
+      force /=3;
+    }
+    if (state & LEFT) {
+      this->body->ApplyForce( b2Vec2(-force,0), this->body->GetWorldCenter() );
+    }
+    if (state & RIGHT) {
+      this->body->ApplyForce( b2Vec2(force,0), this->body->GetWorldCenter() );
     }
 
     if (!(this->state & INAIR) && (this->state & UP)) {

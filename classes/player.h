@@ -14,8 +14,7 @@ enum StateMask {
     UP      = 0x4,
     DOWN    = 0x8,
     SPACE   = 0x10,
-    INAIR   = 0x20,
-    JUMPING = 0x40
+    INAIR   = 0x20
 };
 
 class Player {
