@@ -30,20 +30,20 @@ public:
 
 
 private:
-  sf::Texture rising;
-  sf::Texture falling;
-  sf::Texture standing;
-  sf::Texture hanging;
+  animation* rising;
+  animation* falling;
+  animation* standing;
+  animation* hanging;
 
-  animation walkLeft();
-  animation walkRight();
-  animation slashLeft();
-  animation slashRight();
-  animation nova();
+  animation* walkLeft;
+  animation* walkRight;
+  animation* slashLeft;
+  animation* slashRight;
+  animation* nova;
 
   void handleKeyboard(sf::RenderWindow &Window);  //sets the state based on keyboard input
   void handleState();                             //resolves conflicting states
   void handlePhysics();                           //handles movement based on states
   void handleAnimation(sf::RenderWindow &Window); //gets the texture from the animator based on the state
-  animation currentAnimation();
+  animation* currentAnimation;
 };

@@ -5,11 +5,15 @@
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
 #include <vector>
+#include <iostream>
 
 
 class animation {
 public:
-  animation(std::vector<sf::Texture> sprites, int delay);
+  animation();
+  animation(std::string type);
+
+  animation(std::string type, int i, int delay);
 
   void start();
 
@@ -19,10 +23,11 @@ public:
 
   void reset();
 
-  sf::Texture getTexture();
+  sf::Texture* getTexture();
 
   void update();
 
+std::vector<sf::Texture> spriteList;
 
 private:
   int frameCount;
@@ -33,5 +38,5 @@ private:
 
   bool stopped;
 
-  std::vector<sf::Texture> spriteList;
+
 };
