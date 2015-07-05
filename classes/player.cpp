@@ -7,71 +7,23 @@ static const float SCALE = 30.f;
 Player::Player(b2World& World) {
   b2BodyDef bodyDef;
   bodyDef.type = b2_dynamicBody; //this will be a dynamic body
-  bodyDef.position.Set(20, 20); //set the starting position
+  bodyDef.position.Set(5, 5); //set the starting position
   bodyDef.angle = 0; //set the starting angle
 
-  rising.loadFromFile("MainSprites/basic/jump1.png");
-  falling.loadFromFile("MainSprites/basic/jump2.png");
-  standing.loadFromFile("MainSprites/basic/idle.png");
-  hanging.loadFromFile("MainSprites/basic/coolguyhanging.png");
+  rising = new animation("jump1");
+  falling = new animation("jump2");
+  standing = new animation("idle");
+  hanging = new animation("hang");
 
-  std::vector<sf::Texture> anim;
 
-  int i = 0;
-  for(i = 0; i<10; i++) {
-    std::stringstream sstm;
-    sstm << "MainSprites/walk/walkframes_000" << i << "_Frame-" << 10-i << ".png";
-    std::string result = sstm.str();
-    sf::Texture tex = sf::Texture();
-    tex.loadFromFile(result);
-    anim.push_back(tex);
-  }
-   animation walkLeft(anim,6);
-  anim.clear();
+   walkLeft = new animation("walk/walkframes", 10, 6);
+   walkRight = new animation("walk/walkframes", 10, 6);
+   slashLeft = new animation("slash/slashframes", 4, 6);
+   slashRight = new animation("slash/slashframes", 4, 6);
+   slashRight = new animation("boom/boomframes", 9, 4);
 
-    for(i = 0; i<10; i++) {
-      std::stringstream sstm;
-      sstm << "MainSprites/walk/walkframes_000" << i << "_Frame-" << 10-i << ".png";
-      std::string result = sstm.str();
-      sf::Texture tex = sf::Texture();
-      tex.loadFromFile(result);
-      anim.push_back(tex);
-    }
-    animation walkRight(anim,6);
-    anim.clear();
-
-    for(i = 0; i<4; i++) {
-      std::stringstream sstm;
-      sstm << "MainSprites/slash/slashframes_000" << i << "_Frame-" << 4-i << ".png";
-      std::string result = sstm.str();
-      sf::Texture tex = sf::Texture();
-      tex.loadFromFile(result);
-      anim.push_back(tex);
-    }
-    animation slashLeft(anim,6);
-    anim.clear();
-
-    for(i = 0; i<4; i++) {
-      std::stringstream sstm;
-      sstm << "MainSprites/slash/slashframes_000" << i << "_Frame-" << 4-i << ".png";
-      std::string result = sstm.str();
-      sf::Texture tex = sf::Texture();
-      tex.loadFromFile(result);
-      anim.push_back(tex);
-    }
-    animation slashRight(anim,6);
-    anim.clear();
-
-    for(i = 0; i<10; i++) {
-      std::stringstream sstm;
-      sstm << "MainSprites/boom/boomframes_000" << i << "_Frame-" << 10-i << ".png";
-      std::string result = sstm.str();
-      sf::Texture tex = sf::Texture();
-      tex.loadFromFile(result);
-      anim.push_back(tex);
-    }
-    animation nova(anim,4);
-
+currentAnimation = walkLeft;
+currentAnimation->start();
 
   this->body = World.CreateBody(&bodyDef);
 
@@ -88,6 +40,8 @@ Player::~Player() {}
 
 void Player::update(sf::RenderWindow &Window) {
   //handle keyboard
+  currentAnimation->update();
+
   handleKeyboard(Window);
 
   handleState();
@@ -97,8 +51,6 @@ void Player::update(sf::RenderWindow &Window) {
   //get textures from animator and render it to the players position
   handleAnimation(Window);
 
-  //logging
-  std::cout<< this->body->GetPosition().t << std::endl;
 }
 
 
@@ -108,7 +60,7 @@ void Player::handlePhysics() {
 
 void Player::handleAnimation(sf::RenderWindow &Window) {
     sf::Sprite Sprite;
-    //Sprite.setTexture(animator.getTexture());
+    Sprite.setTexture(*currentAnimation->getTexture());
     Sprite.setOrigin(16.f, 16.f);
     Sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
     Sprite.setRotation(this->body->GetAngle() * 180/b2_pi);

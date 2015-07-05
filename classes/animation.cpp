@@ -1,14 +1,49 @@
 #include "animation.h"
+#include <sstream>
+#include <iostream>
+
+animation::animation(std::string type) {
 
 
-  animation::animation(std::vector<sf::Texture> sprites, int delay) {
+    std::stringstream sstm;
+    sstm << "MainSprites/basic" << type << ".png";
+    std::string result = sstm.str();
+    sf::Texture* tex = new sf::Texture();
+    tex->loadFromFile(result);
+    spriteList.push_back(*tex);
+
+
+
+  this->frameDelay = 6;
+  this->stopped = true;
+  this->frameCount = 0;
+  this->currentFrame= 0;
+  this->animationDirection=0;
+  this->totalFrames=1;
+}
+
+
+  animation::animation(std::string type, int end, int delay) {
+
+
+    int i;
+    for(i = 0; i<end; i++) {
+      std::stringstream sstm;
+      sstm << "MainSprites/" << type << "_000" << i << "_Frame-" << end-i << ".png";
+      std::string result = sstm.str();
+      sf::Texture* tex = new sf::Texture();
+      tex->loadFromFile(result);
+      spriteList.push_back(*tex);
+    }
+
+
+
     this->frameDelay = delay;
     this->stopped = true;
-    this->spriteList = sprites;
     this->frameCount = 0;
     this->currentFrame= 0;
-    this->animationDirection=0;
-    this->totalFrames=sprites.size();
+    this->animationDirection=-1;
+    this->totalFrames=spriteList.size();
   }
 
   void animation::start() {
@@ -46,8 +81,10 @@
         this->currentFrame = 0;
     }
 
-    sf::Texture animation::getTexture() {
-      return spriteList[currentFrame];
+    sf::Texture* animation::getTexture() {
+      std::cout << currentFrame << std::endl;
+      return &spriteList[currentFrame];
+
     }
 
     void animation::update() {
