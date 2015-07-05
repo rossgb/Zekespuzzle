@@ -26,10 +26,18 @@ public:
   b2Body* body;
   int i;
   sf::Sprite sprite;
+  sf::Sprite hoopbacksp;
+  sf::Sprite hoopfrontsp;
   int state;
 
 
 private:
+  float lastx;
+  float lasty;
+
+  sf::Texture hoopback;
+  sf::Texture hoopfront;
+
   animation* rising;
   animation* falling;
   animation* standing;

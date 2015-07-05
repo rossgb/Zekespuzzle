@@ -10,12 +10,15 @@ Player::Player(b2World& World) {
   bodyDef.position.Set(5, 5); //set the starting position
   bodyDef.angle = 0; //set the starting angle
 
+  hoopfront.loadFromFile("MainSprites/basic/hoopfront.png");
+  hoopback.loadFromFile("MainSprites/basic/hoopback.png");
+
+
+
   rising = new animation("jump1");
   falling = new animation("jump2");
   standing = new animation("idle");
   hanging = new animation("hang");
-
-
    walkLeft = new animation("walk/walkframes", 10, 6);
    walkRight = new animation("walk/walkframes", 10, 6);
    slashLeft = new animation("slash/slashframes", 4, 6);
@@ -35,6 +38,8 @@ currentAnimation->start();
   FixtureDef.shape = &Shape;
   this->body->CreateFixture(&FixtureDef);
   this->state = NONE;
+  lastx=SCALE * this->body->GetPosition().x;
+  lasty=SCALE * this->body->GetPosition().y;
 }
 Player::~Player() {}
 
@@ -61,12 +66,32 @@ void Player::handlePhysics() {
 }
 
 void Player::handleAnimation(sf::RenderWindow &Window) {
-    sf::Sprite Sprite;
-    Sprite.setTexture(*currentAnimation->getTexture());
-    Sprite.setOrigin(16.f, 16.f);
-    Sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
-    Sprite.setRotation(this->body->GetAngle() * 180/b2_pi);
-    Window.draw(Sprite);
+  hoopbacksp;
+  hoopbacksp.setTexture(hoopback);
+  hoopbacksp.setOrigin(81.f,25.f);
+  hoopbacksp.setPosition(lastx,lasty);
+  Window.draw(hoopbacksp);
+
+  sf::Sprite Sprite;
+  Sprite.setTexture(*currentAnimation->getTexture());
+  Sprite.setOrigin(30.f, 30.f);
+  Sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
+  Sprite.setRotation(this->body->GetAngle() * 180/b2_pi);
+  if (state&LEFT) {
+    Sprite.setScale(-1.f,1.f);
+  }
+
+  Window.draw(Sprite);
+
+  hoopfrontsp;
+  hoopfrontsp.setTexture(hoopfront);
+  hoopfrontsp.setOrigin(81.f,25.f);
+  hoopfrontsp.setPosition(lastx,lasty);
+  Window.draw(hoopfrontsp);
+
+  lastx=SCALE * this->body->GetPosition().x;
+  lasty=SCALE * this->body->GetPosition().y;
+
 }
 
 void Player::handleState() {
