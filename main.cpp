@@ -20,7 +20,7 @@ int main()
 		Window.setKeyRepeatEnabled(false);
 
     /** Prepare the world */
-    b2Vec2 Gravity(0.f, 9.8f);
+    b2Vec2 Gravity(0.f, 19.f);
     b2World World(Gravity, true);
     CreateGround(World, 400.f, 500.f);
 
