@@ -87,7 +87,7 @@ void Player::handlePhysics() {
     if (!(this->state & INAIR) && (this->state & UP)) {
         std::cout << "jump" << std::endl;
         this->state += INAIR;
-        this->body->ApplyLinearImpulse( b2Vec2(0,-5), this->body->GetWorldCenter());
+        this->body->ApplyLinearImpulse( b2Vec2(0,-17), this->body->GetWorldCenter());
     }
 }
 
@@ -96,23 +96,45 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   hoopbacksp.setTexture(hoopback);
   hoopbacksp.setOrigin(81.f,25.f);
   hoopbacksp.setPosition(lastx,lasty);
-  Window.draw(hoopbacksp);
-
-  sf::Sprite Sprite;
-  Sprite.setTexture(*currentAnimation->getTexture());
-  Sprite.setOrigin(30.f, 30.f);
-  Sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
-  Sprite.setRotation(this->body->GetAngle() * 180/b2_pi);
   if (state&LEFT) {
-    Sprite.setScale(-1.f,1.f);
+    hoopbacksp.setScale(-1.f,1.f);
+  }
+  if (state&RIGHT) {
+    hoopbacksp.setScale(1.f,1.f);
   }
 
-  Window.draw(Sprite);
+  Window.draw(hoopbacksp);
+
+  if (state&INAIR && this->body->GetLinearVelocity().y<0) {
+    currentAnimation = rising;
+  } else if (state&INAIR && this->body->GetLinearVelocity().y>0) {
+    currentAnimation = falling;
+  } else {
+    currentAnimation = walkLeft;
+  }
+  sprite.setTexture(*currentAnimation->getTexture());
+  sprite.setOrigin(30.f, 30.f);
+  sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
+  sprite.setRotation(this->body->GetAngle() * 180/b2_pi);
+  if (state&LEFT) {
+    sprite.setScale(-1.f,1.f);
+  }
+  if (state&RIGHT) {
+    sprite.setScale(1.f,1.f);
+  }
+
+  Window.draw(sprite);
 
   hoopfrontsp;
   hoopfrontsp.setTexture(hoopfront);
   hoopfrontsp.setOrigin(81.f,25.f);
   hoopfrontsp.setPosition(lastx,lasty);
+  if (state&LEFT) {
+    hoopfrontsp.setScale(-1.f,1.f);
+  }
+  if (state&RIGHT) {
+    hoopfrontsp.setScale(1.f,1.f);
+  }
   Window.draw(hoopfrontsp);
 
   lastx=SCALE * this->body->GetPosition().x;
