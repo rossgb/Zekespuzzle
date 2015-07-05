@@ -42,7 +42,6 @@ currentAnimation->start();
   this->state = NONE;
   lastx=SCALE * this->body->GetPosition().x;
   lasty=SCALE * this->body->GetPosition().y;
-
 }
 Player::~Player() {}
 
@@ -64,12 +63,10 @@ void Player::update(sf::RenderWindow &Window) {
 
 void Player::handlePhysics() {
     if (this->body->GetLinearVelocity().y == 0 && (state & INAIR)) {
-        std::cout << "landed";
         state -= INAIR;
     }
 
     if (abs(this->body->GetLinearVelocity().y) > 0.1 && !(state & INAIR)) {
-        std::cout << "un-landed";
         state += INAIR;
     }
 
@@ -84,10 +81,16 @@ void Player::handlePhysics() {
       this->body->ApplyForce( b2Vec2(force,0), this->body->GetWorldCenter() );
     }
 
-    if (!(this->state & INAIR) && (this->state & UP)) {
-        std::cout << "jump" << std::endl;
-        this->state += INAIR;
+    if (!(state & INAIR) && (state & UP)) {
+        state += INAIR;
         this->body->ApplyLinearImpulse( b2Vec2(0,-17), this->body->GetWorldCenter());
+        state -= UP;
+    } else if ((state & INAIR) && (state & UP) && !(state & JUMPED)) {
+        this->body->ApplyLinearImpulse( b2Vec2(0,-7), this->body->GetWorldCenter());
+        state -= UP;
+        state += JUMPED;
+    } else if (state & UP) {
+        state -= UP;
     }
 }
 
@@ -218,7 +221,6 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
               }
               if (event.key.code == sf::Keyboard::Up)
               {
-                  this->state -= UP;
               }
               if (event.key.code == sf::Keyboard::Down)
               {
