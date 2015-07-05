@@ -29,7 +29,7 @@ public:
 
 std::vector<sf::Texture> spriteList;
 
-private:
+
   int frameCount;
   int frameDelay;
   int currentFrame;

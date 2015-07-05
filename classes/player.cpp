@@ -74,7 +74,7 @@ void Player::handlePhysics() {
     }
 
     int force = 50;
-    if (state & INAIR) {
+    if (state & INAIR || state&SPACE) {
       force /=3;
     }
     if (state & LEFT) {
@@ -102,18 +102,41 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   if (state&RIGHT) {
     hoopbacksp.setScale(1.f,1.f);
   }
-
-  Window.draw(hoopbacksp);
-
-  if (state&INAIR && this->body->GetLinearVelocity().y<0) {
-    currentAnimation = rising;
-  } else if (state&INAIR && this->body->GetLinearVelocity().y>0) {
-    currentAnimation = falling;
-  } else {
-    currentAnimation = walkLeft;
+  if(!(state&SPACE)) {
+    Window.draw(hoopbacksp);
   }
-  sprite.setTexture(*currentAnimation->getTexture());
-  sprite.setOrigin(30.f, 30.f);
+
+
+
+  if (state&SPACE) {
+    currentAnimation=slashLeft;
+    currentAnimation->start();
+    std::cout << currentAnimation->currentFrame << std::endl;
+  }
+  if (state&SPACE && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==5)) {
+    currentAnimation->reset();
+    this->state -= SPACE;
+
+  }
+  if (!(state&SPACE)) {
+    if (state&INAIR && this->body->GetLinearVelocity().y<0) {
+      currentAnimation = rising;
+    } else if (state&INAIR && this->body->GetLinearVelocity().y>0) {
+      currentAnimation = falling;
+    } else if (!(state & (INAIR|LEFT|RIGHT))) {
+      currentAnimation = standing;
+    } else {
+      currentAnimation = walkLeft;
+    }
+  }
+sprite.setTexture(*currentAnimation->getTexture());
+  if (state&SPACE) {
+    sprite.setOrigin(132.f, 30.f);
+    sf::Rect<int> slashrect = sf::Rect<int>(0,0, 264,66);
+    sprite.setTextureRect(slashrect);
+  } else {
+    sprite.setOrigin(30.f, 30.f);
+  }
   sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
   sprite.setRotation(this->body->GetAngle() * 180/b2_pi);
   if (state&LEFT) {
@@ -125,6 +148,9 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
 
   Window.draw(sprite);
 
+
+
+
   hoopfrontsp;
   hoopfrontsp.setTexture(hoopfront);
   hoopfrontsp.setOrigin(81.f,25.f);
@@ -135,7 +161,9 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   if (state&RIGHT) {
     hoopfrontsp.setScale(1.f,1.f);
   }
-  Window.draw(hoopfrontsp);
+  if(!(state&SPACE)) {
+    Window.draw(hoopfrontsp);
+  }
 
   lastx=SCALE * this->body->GetPosition().x;
   lasty=SCALE * this->body->GetPosition().y;
@@ -172,8 +200,10 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
               {
                   this->state += DOWN;
               }
-              if (event.key.code == sf::Keyboard::Space)
+              if (event.key.code == sf::Keyboard::Space && !(state&SPACE))
               {
+
+                std::cout << "space added" << std::endl;
                   this->state += SPACE;
               }
               break;
@@ -196,7 +226,7 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
               }
               if (event.key.code == sf::Keyboard::Space)
               {
-                  this->state -= SPACE;
+                  // this->state -= SPACE;
               }
               break;
 
