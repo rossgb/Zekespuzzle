@@ -15,9 +15,14 @@ void CreateBox(b2World& World, int MouseX, int MouseY);
 int main()
 {
     /** Prepare the window */
-    sf::RenderWindow Window(sf::VideoMode(1300, 900, 32), "Test");
+    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
     Window.setFramerateLimit(60);
 		Window.setKeyRepeatEnabled(false);
+
+    sf::View view(sf::FloatRect(0, 0, Window.getSize().x, Window.getSize().y));
+    view.setSize(sf::Vector2f(1080*1.5, 720*1.5));
+
+
 
     /** Prepare the world */
     b2Vec2 Gravity(0.f, 19.f);
@@ -46,6 +51,8 @@ int main()
 
         Window.clear(sf::Color(101,191,214,255));
 
+        view.setCenter(player.body->GetPosition().x * SCALE, player.body->GetPosition().y * SCALE);
+        Window.setView(view);
 
         sf::Sprite ground;
         ground.setTexture(GroundTexture);
