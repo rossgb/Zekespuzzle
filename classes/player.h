@@ -21,7 +21,8 @@ enum StateMask {
     X         = 0x200,
     POSED     = 0x400,
     THROWN    = 0x800,
-    RETURN    = 0x1000
+    RETURN    = 0x1000,
+    JUMP1     = 0x2000
 
 };
 
@@ -50,6 +51,7 @@ public:
 
 private:
   int novacounter;
+  int hoopdir;
   float lastx;
   float lasty;
   b2Vec2 hooporigin;

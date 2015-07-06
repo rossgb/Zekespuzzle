@@ -32,14 +32,15 @@ Player::Player(b2World& World) {
   bodyDef.fixedRotation = true;
 
   b2BodyDef hoopDef;
-  hoopDef.type = b2_dynamicBody;
+  hoopDef.type = b2_kinematicBody;
   hoopDef.position.Set(5,5);
   hoopDef.angle = 0;
   hoopDef.fixedRotation = true;
-  hoopDef.linearDamping = 0.f;
+
 
   this->body = World.CreateBody(&bodyDef);
   this->hoop = World.CreateBody(&hoopDef);
+
 
   b2PolygonShape Shape;
   Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
@@ -50,7 +51,7 @@ Player::Player(b2World& World) {
   this->body->CreateFixture(&FixtureDef);
 
   b2CircleShape circle;
-  // circle.m_p.Set(2.0f, 3.0f);
+  // circle.m_p.Set(2.0/f, 3.0f);
   circle.m_radius = (32.f/2)/SCALE;
   b2FixtureDef hoopFixDef;
   hoopFixDef.density = 0.f;
@@ -68,6 +69,7 @@ Player::Player(b2World& World) {
   counter = 0;
   debug = true;
   novacounter = 0;
+  hoopdir = 0;
 }
 Player::~Player() {}
 
@@ -118,22 +120,22 @@ void Player::handlePhysics() {
 
     //hover velocity
     if (state&NOVA) {
-      this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x/1.2,-0.9));
+      this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x/1.1,-1.4));
     }
 
     //only allow jump to be pressed when not in NOVA
     if (!(state&NOVA)) {
-      if (!(state & INAIR) && (state & UP)) {
+      if (!(state & INAIR) && (state & JUMP1)) {
           state += INAIR;
-          this->body->ApplyLinearImpulse( b2Vec2(0,-17), this->body->GetWorldCenter());
-          state -= UP;
-      } else if ((state & INAIR) && (state & UP) && !(state & JUMPED)) {
+          this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
+          state -= JUMP1;
+      } else if ((state & INAIR) && (state & JUMP1) && !(state & JUMPED)) {
           this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
-          this->body->ApplyLinearImpulse( b2Vec2(0,-17), this->body->GetWorldCenter());
-          state -= UP;
+          this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
+          state -= JUMP1;
           state += JUMPED;
-      } else if (state & UP) {
-          state -= UP;
+      } else if (state & JUMP1) {
+          state -= JUMP1;
       }
     }
 
@@ -146,19 +148,39 @@ void Player::handlePhysics() {
       this->body->SetLinearVelocity(b2Vec2(-10,this->body->GetLinearVelocity().y));
     }
 
+
     //HOOP STUFF
     //follow the character around
-    if (!(state&THROWN)) {
-      hoop->SetTransform(b2Vec2(lastx,lasty),0);
-      hooporigin.x = lastx;
-      hooporigin.y = lasty;
-    } else {
-      hoop->SetLinearVelocity(b2Vec2(1000000,0));
+
+    if (b2Distance(body->GetPosition(),hoop->GetPosition())<0.9 && state&RETURN) {
+      state -= RETURN;
     }
 
-    if (abs((hoop->GetPosition().x)-hooporigin.x) > 300 && (state&THROWN)) {
+    if (!(state&THROWN) && !(state&RETURN)) {
+      hoop->SetTransform(b2Vec2(lastx/SCALE,lasty/SCALE),0);
+      hooporigin.x = lastx/SCALE;
+      hooporigin.y = lasty/SCALE;
+    } else if (state&RETURN) {
+      hoop->SetLinearVelocity(b2Vec2((body->GetPosition().x-hoop->GetPosition().x)*6,(body->GetPosition().y-hoop->GetPosition().y)*6));
+    } else {
+      switch (hoopdir){
+        case 0:
+        this->hoop->SetLinearVelocity(b2Vec2(20,0)); break;
+        // hoop->SetTransform(b2Vec2(hoop->GetPosition().x+8,hoop->GetPosition().y),0);
+        case 1:this->hoop->SetLinearVelocity(b2Vec2(20,20)); break;
+        case 2:this->hoop->SetLinearVelocity(b2Vec2(0,20)); break;
+        case 3:this->hoop->SetLinearVelocity(b2Vec2(-20,20)); break;
+        case 4:this->hoop->SetLinearVelocity(b2Vec2(-20,0)); break;
+        case 5:this->hoop->SetLinearVelocity(b2Vec2(-20,-20)); break;
+        case 6:this->hoop->SetLinearVelocity(b2Vec2(0,-20)); break;
+        case 7:this->hoop->SetLinearVelocity(b2Vec2(20,-20)); break;
+        case 8:state -= THROWN; break;
+      }
+    }
+
+    if (((hoop->GetPosition().x)-hooporigin.x)*((hoop->GetPosition().x)-hooporigin.x) + ((hoop->GetPosition().y)-hooporigin.y)*((hoop->GetPosition().y)-hooporigin.y) > 200 && (state&THROWN)) {
       state -= THROWN;
-      // state += RETURN;
+      state += RETURN;
     }
 }
 
@@ -181,7 +203,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
     hoopbacksp.setTextureRect(sf::Rect<int>(0,0,160,66));
   }
 
-  hoopbacksp.setPosition(hoop->GetPosition().x,hoop->GetPosition().y);
+  hoopbacksp.setPosition(SCALE * hoop->GetPosition().x,SCALE * hoop->GetPosition().y);
   if (state&LEFT && !(state&THROWN)) {
     hoopbacksp.setScale(-1.f,1.f);
   }
@@ -202,7 +224,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
     if (state&X) {
       currentAnimation->stop();
       novacounter++;
-      if (novacounter > 60) {
+      if (novacounter > 30) {
         novacounter = 0;
         state -= X;
       }
@@ -219,6 +241,35 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   if (!(state&NOVA) && !(state&X) && state&POSED && !(state&THROWN)) {
     state -= POSED;
     state += THROWN;
+    if (state&RIGHT) {
+      hoopdir = 0;
+      if (state&UP) {
+        hoopdir = 7;
+      }
+      if (state&DOWN) {
+        hoopdir = 1;
+      }
+    } else if (state&LEFT) {
+      hoopdir = 4;
+      if (state&UP) {
+        hoopdir = 5;
+      }
+      if (state&DOWN) {
+        hoopdir = 3;
+      }
+    } else {
+      hoopdir = 8;
+      if (state&UP) {
+        hoopdir = 6;
+      }
+      if (state&DOWN) {
+        hoopdir = 2;
+      }
+    }
+
+
+
+
   }
   if (state&SPACE && !(state&NOVA)) {
     currentAnimation=slashLeft;
@@ -296,8 +347,8 @@ void Player::debugPrints() {
   counter++;
   if (counter>60) {
     counter = 0;
-    std::cout << "novacounter = " << novacounter<< std::endl;
-    std::cout << "player vel x = " << body->GetLinearVelocity().x<< std::endl;
+    std::cout << "hoop pos x = " << hoop->GetPosition().x<< std::endl;
+    std::cout << "player pos x = " << body->GetPosition().x<< std::endl;
     std::cout << ((counter % 2 == 0) ? "PRINTING STATES" : "PRINTING STATES!") << std::endl;
     std::cout << "LEFT     = " << ((state&LEFT) ? "True" : "False") << std::endl;
     std::cout << "RIGHT    = " << ((state&RIGHT) ? "True" : "False") << std::endl;
@@ -339,11 +390,11 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
               }
               if (event.key.code == sf::Keyboard::Up)
               {
-                  this->state += UP;
+                this->state += UP;
               }
               if (event.key.code == sf::Keyboard::Down)
               {
-                  // this->state += DOWN;
+                  this->state += DOWN;
               }
               if (event.key.code == sf::Keyboard::Space && !(state&SPACE) && !(state&NOVA) && !(state&THROWN) && !(state&RETURN))
               {
@@ -361,6 +412,10 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
                     this->state += NOVA;
                   }
               }
+              if (event.key.code == sf::Keyboard::C)
+              {
+                  this->state += JUMP1;
+              }
               if (event.key.code == sf::Keyboard::Escape)
               {
                   Window.close();
@@ -377,10 +432,11 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
               }
               if (event.key.code == sf::Keyboard::Up && (state&UP))
               {
+                this->state -= UP;
               }
               if (event.key.code == sf::Keyboard::Down && (state&DOWN))
               {
-                  // this->state -= DOWN;
+                  this->state -= DOWN;
               }
               if (event.key.code == sf::Keyboard::Space)
               {
