@@ -32,7 +32,7 @@ Player::Player(b2World& World) {
   bodyDef.fixedRotation = true;
 
   b2BodyDef hoopDef;
-  hoopDef.type = b2_kinematicBody;
+  hoopDef.type = b2_dynamicBody;
   hoopDef.position.Set(5,5);
   hoopDef.angle = 0;
   hoopDef.fixedRotation = true;
@@ -153,10 +153,10 @@ void Player::handlePhysics() {
       hooporigin.x = lastx;
       hooporigin.y = lasty;
     } else {
-      hoop->SetLinearVelocity(b2Vec2(50000,0));
+      hoop->SetLinearVelocity(b2Vec2(1000000,0));
     }
 
-    if (abs((hoop->GetPosition().x)-hooporigin.x) > 500 && (state&THROWN)) {
+    if (abs((hoop->GetPosition().x)-hooporigin.x) > 300 && (state&THROWN)) {
       state -= THROWN;
       // state += RETURN;
     }
@@ -169,7 +169,18 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   } else {
     hoopbacksp.setTexture(hoopback);
   }
+  if (state&THROWN || state&RETURN) {
+  hoopbacksp.setOrigin(61.f,57.f);
+  } else {
   hoopbacksp.setOrigin(81.f,25.f);
+  }
+
+  if (state&THROWN || state&RETURN) {
+  hoopbacksp.setTextureRect(sf::Rect<int>(0,0,123,114));
+  } else {
+    hoopbacksp.setTextureRect(sf::Rect<int>(0,0,160,66));
+  }
+
   hoopbacksp.setPosition(hoop->GetPosition().x,hoop->GetPosition().y);
   if (state&LEFT && !(state&THROWN)) {
     hoopbacksp.setScale(-1.f,1.f);
@@ -227,6 +238,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
       currentAnimation = standing;
     } else {
       currentAnimation = walkLeft;
+      currentAnimation->start();
     }
   }
 sprite.setTexture(*currentAnimation->getTexture());
@@ -285,6 +297,7 @@ void Player::debugPrints() {
   if (counter>60) {
     counter = 0;
     std::cout << "novacounter = " << novacounter<< std::endl;
+    std::cout << "player vel x = " << body->GetLinearVelocity().x<< std::endl;
     std::cout << ((counter % 2 == 0) ? "PRINTING STATES" : "PRINTING STATES!") << std::endl;
     std::cout << "LEFT     = " << ((state&LEFT) ? "True" : "False") << std::endl;
     std::cout << "RIGHT    = " << ((state&RIGHT) ? "True" : "False") << std::endl;
