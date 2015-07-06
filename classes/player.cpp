@@ -66,9 +66,14 @@ Player::Player(b2World& World) {
   lastx=SCALE * this->body->GetPosition().x;
   lasty=SCALE * this->body->GetPosition().y;
 
+  //debug
   counter = 0;
   debug = true;
+  //debug
+
+  //this is to count the number of frames nova hover lasts
   novacounter = 0;
+  //the direction the hoop is thrown
   hoopdir = 0;
 }
 Player::~Player() {}
@@ -150,19 +155,19 @@ void Player::handlePhysics() {
 
 
     //HOOP STUFF
-    //follow the character around
-
+    //detect when the returning hoop is on the character to catch it
     if (b2Distance(body->GetPosition(),hoop->GetPosition())<0.9 && state&RETURN) {
       state -= RETURN;
     }
 
+    //follow the character around
     if (!(state&THROWN) && !(state&RETURN)) {
       hoop->SetTransform(b2Vec2(lastx/SCALE,lasty/SCALE),0);
       hooporigin.x = lastx/SCALE;
       hooporigin.y = lasty/SCALE;
-    } else if (state&RETURN) {
+    } else if (state&RETURN) {  //the hoop velocity returning to the character
       hoop->SetLinearVelocity(b2Vec2((body->GetPosition().x-hoop->GetPosition().x)*6,(body->GetPosition().y-hoop->GetPosition().y)*6));
-    } else {
+    } else { //the velocity when the hoop is thrown
       switch (hoopdir){
         case 0:
         this->hoop->SetLinearVelocity(b2Vec2(20,0)); break;
@@ -178,6 +183,7 @@ void Player::handlePhysics() {
       }
     }
 
+    //if the hoop has travelled sufficient distance, start returning
     if (((hoop->GetPosition().x)-hooporigin.x)*((hoop->GetPosition().x)-hooporigin.x) + ((hoop->GetPosition().y)-hooporigin.y)*((hoop->GetPosition().y)-hooporigin.y) > 200 && (state&THROWN)) {
       state -= THROWN;
       state += RETURN;
@@ -185,6 +191,7 @@ void Player::handlePhysics() {
 }
 
 void Player::handleAnimation(sf::RenderWindow &Window) {
+  //the back part of the hoop is also used as the thrown hoop sprite
   hoopbacksp;
   if (state&THROWN || state&RETURN) {
     hoopbacksp.setTexture(hoopflat);
@@ -204,10 +211,10 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   }
 
   hoopbacksp.setPosition(SCALE * hoop->GetPosition().x,SCALE * hoop->GetPosition().y);
-  if (state&LEFT && !(state&THROWN)) {
+  if (state&LEFT) {
     hoopbacksp.setScale(-1.f,1.f);
   }
-  if (state&RIGHT && !(state&THROWN)) {
+  if (state&RIGHT) {
     hoopbacksp.setScale(1.f,1.f);
   }
   if(!(state&SPACE) && !(state&NOVA)) {
@@ -220,6 +227,8 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
     currentAnimation=nova;
     currentAnimation->start();
   }
+  //at the end of the nova animation, allow the player to stay on the last frame for a short time while holding X
+  //also gives time to aim the hoop before it's thrown
   if (state&NOVA && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==3)) {
     if (state&X) {
       currentAnimation->stop();
@@ -228,8 +237,9 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
         novacounter = 0;
         state -= X;
       }
+      //when the last frame is reached, if X is still pressed, get the hoop ready to throw (POSED state)
       if (!(state&POSED)) state += POSED;
-    } else {
+    } else { //the animation ended without X being held
       novacounter = 0;
       currentAnimation->reset();
       slashLeft->reset();
@@ -238,6 +248,8 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
 
   }
 
+  //if the hoop was posed and nova is done, decide which direction to throw the hoop
+  //and change states
   if (!(state&NOVA) && !(state&X) && state&POSED && !(state&THROWN)) {
     state -= POSED;
     state += THROWN;
@@ -266,11 +278,10 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
         hoopdir = 2;
       }
     }
-
-
-
-
   }
+
+
+  //basic slash animation
   if (state&SPACE && !(state&NOVA)) {
     currentAnimation=slashLeft;
     currentAnimation->start();
@@ -278,8 +289,9 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   if (state&SPACE && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==5)) {
     currentAnimation->reset();
     this->state -= SPACE;
-
   }
+
+  //bother with basic movement sprites if not attacking
   if (!(state&SPACE) && !(state&NOVA)) {
     if (state&INAIR && this->body->GetLinearVelocity().y<0) {
       currentAnimation = rising;
@@ -292,12 +304,13 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
       currentAnimation->start();
     }
   }
-sprite.setTexture(*currentAnimation->getTexture());
-if (state&NOVA) {
-  sprite.setOrigin(105.f, 105.f);
-  sf::Rect<int> slashrect = sf::Rect<int>(0,0, 210,210);
-  sprite.setTextureRect(slashrect);
-} else if (state&SPACE && !(state&NOVA)) {
+  //decide on the final sprite based on the animation and state
+  sprite.setTexture(*currentAnimation->getTexture());
+  if (state&NOVA) {
+    sprite.setOrigin(105.f, 105.f);
+    sf::Rect<int> slashrect = sf::Rect<int>(0,0, 210,210);
+    sprite.setTextureRect(slashrect);
+  } else if (state&SPACE && !(state&NOVA)) {
     sprite.setOrigin(132.f, 39.f);
     sf::Rect<int> slashrect = sf::Rect<int>(0,0, 264,66);
     sprite.setTextureRect(slashrect);
@@ -319,7 +332,7 @@ if (state&NOVA) {
 
 
 
-
+  //FRONT HOOP
   hoopfrontsp;
   hoopfrontsp.setTexture(hoopfront);
   hoopfrontsp.setOrigin(81.f,25.f);
@@ -343,6 +356,8 @@ void Player::handleState() {
 
 }
 
+//WILL EXECUTE EVERY TIME THE COUNTER MEETS THE IF CONDITION
+//PUSH 'D' TO DISABLE/ENABLE
 void Player::debugPrints() {
   counter++;
   if (counter>60) {
