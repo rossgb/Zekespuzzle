@@ -48,8 +48,14 @@ int main()
     {
 
         World.Step(1/60.f, 8, 3);
-
-        Window.clear(sf::Color(101,191,214,255));
+        int darkness = player.body->GetPosition().y/10.f;
+        int r = 101-darkness;
+        int g = 191-darkness;
+        int b = 214-darkness;
+        r = (r<=0)?0:r;
+        g = (g<=0)?0:g;
+        b = (b<=0)?0:b;
+        Window.clear(sf::Color(r,g,b,255));
 
         view.setCenter(player.body->GetPosition().x * SCALE, player.body->GetPosition().y * SCALE);
         Window.setView(view);
