@@ -229,7 +229,8 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   }
   //at the end of the nova animation, allow the player to stay on the last frame for a short time while holding X
   //also gives time to aim the hoop before it's thrown
-  if (state&NOVA && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==3)) {
+  // if (state&NOVA && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==3)) {
+  if (state&NOVA && (currentAnimation->currentFrame==1)) {
     if (state&X) {
       currentAnimation->stop();
       novacounter++;
