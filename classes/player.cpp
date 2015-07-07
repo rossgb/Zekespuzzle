@@ -84,13 +84,14 @@ void Player::update(sf::RenderWindow &Window) {
 
   handleKeyboard(Window);
 
+  handleState();
+
   handlePhysics();
 
-  handleState();
 
   //get textures from animator and render it to the players position
   handleAnimation(Window);
-  if (debug)  debugPrints();
+  if (debug) debugPrints();
 
 }
 
@@ -143,12 +144,13 @@ void Player::handlePhysics() {
     if (!(state&NOVA) && state & C) {
         if (!(state & JUMP1)) {
             state |= JUMP1;
-            this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
+            this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
+            this->body->ApplyLinearImpulse( b2Vec2(0,-16), this->body->GetWorldCenter());
         } else if (!(state & JUMP2) && state & JUMPED) {
             state -= JUMPED;
             state |= JUMP2;
             this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
-            this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
+            this->body->ApplyLinearImpulse( b2Vec2(0,-16), this->body->GetWorldCenter());
         }
     }
 
@@ -191,16 +193,20 @@ void Player::handlePhysics() {
       hooporigin.x = lastx/SCALE;
       hooporigin.y = lasty/SCALE;
     } else if (state&RETURN) {  //the hoop velocity returning to the character
-      hoop->SetLinearVelocity(b2Vec2((body->GetPosition().x-hoop->GetPosition().x)*6,(body->GetPosition().y-hoop->GetPosition().y)*6));
+      b2Vec2 h = hoop->GetPosition();
+      b2Vec2 b = body->GetPosition();
+      b2Vec2 dir = b2Vec2(b.x-h.x,b.y-h.y);
+      dir.Normalize(); dir.x *= 13; dir.y *= 13;
+      hoop->SetLinearVelocity(b2Vec2((b.x-h.x)*5,(b.y-h.y)*5)+(dir));
     } else { //the velocity when the hoop is thrown
       switch (hoopdir){
         case 0:
-        this->hoop->SetLinearVelocity(b2Vec2(20,0)); break;
+        this->hoop->SetLinearVelocity(b2Vec2(20,-0.1)); break;
         // hoop->SetTransform(b2Vec2(hoop->GetPosition().x+8,hoop->GetPosition().y),0);
         case 1:this->hoop->SetLinearVelocity(b2Vec2(20,20)); break;
         case 2:this->hoop->SetLinearVelocity(b2Vec2(0,20)); break;
         case 3:this->hoop->SetLinearVelocity(b2Vec2(-20,20)); break;
-        case 4:this->hoop->SetLinearVelocity(b2Vec2(-20,0)); break;
+        case 4:this->hoop->SetLinearVelocity(b2Vec2(-20,-.1)); break;
         case 5:this->hoop->SetLinearVelocity(b2Vec2(-20,-20)); break;
         case 6:this->hoop->SetLinearVelocity(b2Vec2(0,-20)); break;
         case 7:this->hoop->SetLinearVelocity(b2Vec2(20,-20)); break;
@@ -210,8 +216,38 @@ void Player::handlePhysics() {
 
     //if the hoop has travelled sufficient distance, start returning
     if (((hoop->GetPosition().x)-hooporigin.x)*((hoop->GetPosition().x)-hooporigin.x) + ((hoop->GetPosition().y)-hooporigin.y)*((hoop->GetPosition().y)-hooporigin.y) > 200 && (state&THROWN)) {
+      if(state&CATCH) {
+        state -= CATCH;
+        switch (hoopdir){
+          case 0:
+          this->body->SetLinearVelocity(b2Vec2(10,-0.1)); break;
+          // hoop->SetTransform(b2Vec2(hoop->GetPosition().x+8,hoop->GetPosition().y),0);
+          case 1:this->body->SetLinearVelocity(b2Vec2(10,10)); break;
+          case 2:this->body->SetLinearVelocity(b2Vec2(0,10)); break;
+          case 3:this->body->SetLinearVelocity(b2Vec2(-10,10)); break;
+          case 4:this->body->SetLinearVelocity(b2Vec2(-10,-.1)); break;
+          case 5:this->body->SetLinearVelocity(b2Vec2(-10,-10)); break;
+          case 6:this->body->SetLinearVelocity(b2Vec2(0,-10)); break;
+          case 7:this->body->SetLinearVelocity(b2Vec2(10,-10)); break;
+          case 8:state -= THROWN; break;
+        }
+      }
       state -= THROWN;
       state |= RETURN;
+
+    }
+
+    if (state&THROWN && state&X) {
+      // state |= CATCH;
+      std::cout <<"catch init"<<std::endl;
+    }
+    // if (state&CATCH && !(state&X)) {
+    //   state -= CATCH;
+    //   state |= RETURN;
+    // }
+
+    if (state&CATCH) {
+      body->SetLinearVelocity(hoop->GetLinearVelocity());
     }
 }
 
@@ -248,6 +284,8 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
 
 
   //MAIN PLAYER
+
+
   if (state&NOVA) {
     currentAnimation=nova;
     currentAnimation->start();
@@ -255,13 +293,17 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   //at the end of the nova animation, allow the player to stay on the last frame for a short time while holding X
   //also gives time to aim the hoop before it's thrown
   // if (state&NOVA && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==3)) {
+  if (state&NOVA && (currentAnimation->currentFrame==2||currentAnimation->currentFrame==3) && state&X) {
+    if (!(state&POSED)) state |= POSED;
+  }
+
   if (state&NOVA && (currentAnimation->currentFrame==1)) {
     if (state&X) {
       currentAnimation->stop();
       novacounter++;
       if (novacounter > 30) {
         novacounter = 0;
-        state -= X;
+        state -= NOVA;
       }
       //when the last frame is reached, if X is still pressed, get the hoop ready to throw (POSED state)
       if (!(state&POSED)) state |= POSED;
@@ -276,7 +318,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
 
   //if the hoop was posed and nova is done, decide which direction to throw the hoop
   //and change states
-  if (!(state&NOVA) && !(state&X) && state&POSED && !(state&THROWN)) {
+  if (!(state&NOVA) && state&POSED && !(state&THROWN)) {
     state -= POSED;
     state |= THROWN;
     if (state&RIGHT) {
@@ -330,6 +372,10 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
       currentAnimation->start();
     }
   }
+
+  if (state&CATCH) {
+    currentAnimation = hanging;
+  }
   //decide on the final sprite based on the animation and state
   sprite.setTexture(*currentAnimation->getTexture());
   if (state&NOVA) {
@@ -346,13 +392,19 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
     sprite.setTextureRect(slashrect);
   }
   sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
-  sprite.setRotation(this->body->GetAngle() * 180/b2_pi);
+  if (state&CATCH) {
+    sprite.setRotation(360/8*(hoopdir+2));
+  } else {
+    sprite.setRotation(this->body->GetAngle() * 180/b2_pi);
+  }
+  if (!(state&CATCH)) {
   if (state&LEFT) {
     sprite.setScale(-1.f,1.f);
   }
   if (state&RIGHT) {
     sprite.setScale(1.f,1.f);
   }
+}
 
   Window.draw(sprite);
 
@@ -407,6 +459,7 @@ void Player::debugPrints() {
     std::cout << "JUMP1    = " << ((state&JUMP1) ? "True" : "False") << std::endl;
     std::cout << "JUMP2    = " << ((state&JUMP2) ? "True" : "False") << std::endl;
     std::cout << "C        = " << ((state&C) ? "True" : "False") << std::endl;
+    std::cout << "CATCH    = " << ((state&CATCH) ? "True" : "False") << std::endl;
     std::cout << "RETURN   = " << ((state&RETURN) ? "True" : "False") << "\n\n" << std::endl;
   }
 }
@@ -459,19 +512,27 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
         state -= C;
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::X) && !(state&X) && !(state&THROWN) && !(state&RETURN) && (state & CANNOVA)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::X) && !(state&X) && !(state&RETURN)) {
         state |= SPACE;
         state -= SPACE;
 
-        state -= CANNOVA;
 
         state |= X;
-        if (!(state&NOVA)) {
+        if (state&THROWN) {
+          state |= CATCH;
+        } else if (!(state&NOVA) && state&CANNOVA) {
           state |= NOVA;
+          state -= CANNOVA;
+
         }
     } else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
         state |= X;
         state -= X;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        debug = !debug;
+    } else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+
     }
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {

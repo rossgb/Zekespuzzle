@@ -25,7 +25,8 @@ enum StateMask {
     JUMP1     = 0x2000,
     JUMP2     = 0x4000,
     C         = 0x8000,
-    CANNOVA   = 0x10000
+    CANNOVA   = 0x10000,
+    CATCH     = 0x20000
 
 };
 
