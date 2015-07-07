@@ -62,7 +62,7 @@ Player::Player(b2World& World) {
 
 
 
-  this->state = NONE;
+  state = NONE;
   lastx=SCALE * this->body->GetPosition().x;
   lasty=SCALE * this->body->GetPosition().y;
 
@@ -98,16 +98,23 @@ void Player::update(sf::RenderWindow &Window) {
 void Player::handlePhysics() {
 
     //if the velocity hits zero and the character is in the air, ground and add a jump
-    if (this->body->GetLinearVelocity().y == 0 && (state & INAIR)) {
+    if (this->body->GetLinearVelocity().y == 0) {
+        state |= INAIR;
         state -= INAIR;
-        if (state&JUMPED) {
-          state -= JUMPED;
-        }
+
+        //reset all jumps
+        state |= JUMP1;
+        state |= JUMP2;
+        state |= JUMPED;
+        state -= JUMP2;
+        state -= JUMP1;
+        state -= JUMPED;
+        state |= CANNOVA; // can nova once per jump
     }
 
     //if y velocity is there then character is in the air
     if (abs(this->body->GetLinearVelocity().y) > 0.1 && !(state & INAIR)) {
-        state += INAIR;
+        state |= INAIR;
     }
 
     //walking force
@@ -128,21 +135,39 @@ void Player::handlePhysics() {
       this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x/1.1,-1.4));
     }
 
-    //only allow jump to be pressed when not in NOVA
-    if (!(state&NOVA)) {
-      if (!(state & INAIR) && (state & JUMP1)) {
-          state += INAIR;
-          this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
-          state -= JUMP1;
-      } else if ((state & INAIR) && (state & JUMP1) && !(state & JUMPED)) {
-          this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
-          this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
-          state -= JUMP1;
-          state += JUMPED;
-      } else if (state & JUMP1) {
-          state -= JUMP1;
-      }
+    //if not nova
+      //if jump1 is false
+        //first jump
+      //if jump1 is true and jump2 is false
+        //second jump
+    if (!(state&NOVA) && state & C) {
+        if (!(state & JUMP1)) {
+            state |= JUMP1;
+            this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
+        } else if (!(state & JUMP2) && state & JUMPED) {
+            state -= JUMPED;
+            state |= JUMP2;
+            this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
+            this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
+        }
     }
+
+    //
+    // //only allow jump to be pressed when not in NOVA
+    // if (!(state&NOVA)) {
+    //   if (!(state & INAIR) && (state & JUMP1)) {
+    //       state |= INAIR;
+    //       this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
+    //       state -= JUMP1;
+    //   } else if ((state & INAIR) && (state & JUMP1) && !(state & JUMPED)) {
+    //       this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
+    //       this->body->ApplyLinearImpulse( b2Vec2(0,-14), this->body->GetWorldCenter());
+    //       state -= JUMP1;
+    //       state |= JUMPED;
+    //   } else if (state & JUMP1) {
+    //       state -= JUMP1;
+    //   }
+    // }
 
     //limit horizontal velocity
     if (this->body->GetLinearVelocity().x>10) {
@@ -154,7 +179,7 @@ void Player::handlePhysics() {
     }
 
 
-    //HOOP STUFF
+    //-------HOOP STUFF-----------
     //detect when the returning hoop is on the character to catch it
     if (b2Distance(body->GetPosition(),hoop->GetPosition())<0.9 && state&RETURN) {
       state -= RETURN;
@@ -186,7 +211,7 @@ void Player::handlePhysics() {
     //if the hoop has travelled sufficient distance, start returning
     if (((hoop->GetPosition().x)-hooporigin.x)*((hoop->GetPosition().x)-hooporigin.x) + ((hoop->GetPosition().y)-hooporigin.y)*((hoop->GetPosition().y)-hooporigin.y) > 200 && (state&THROWN)) {
       state -= THROWN;
-      state += RETURN;
+      state |= RETURN;
     }
 }
 
@@ -239,12 +264,12 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
         state -= X;
       }
       //when the last frame is reached, if X is still pressed, get the hoop ready to throw (POSED state)
-      if (!(state&POSED)) state += POSED;
+      if (!(state&POSED)) state |= POSED;
     } else { //the animation ended without X being held
       novacounter = 0;
       currentAnimation->reset();
       slashLeft->reset();
-      this->state -= NOVA;
+      state -= NOVA;
     }
 
   }
@@ -253,7 +278,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   //and change states
   if (!(state&NOVA) && !(state&X) && state&POSED && !(state&THROWN)) {
     state -= POSED;
-    state += THROWN;
+    state |= THROWN;
     if (state&RIGHT) {
       hoopdir = 0;
       if (state&UP) {
@@ -289,7 +314,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   }
   if (state&SPACE && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==5)) {
     currentAnimation->reset();
-    this->state -= SPACE;
+    state -= SPACE;
   }
 
   //bother with basic movement sprites if not attacking
@@ -366,6 +391,7 @@ void Player::debugPrints() {
     std::cout << "hoop pos x = " << hoop->GetPosition().x<< std::endl;
     std::cout << "player pos x = " << body->GetPosition().x<< std::endl;
     std::cout << ((counter % 2 == 0) ? "PRINTING STATES" : "PRINTING STATES!") << std::endl;
+    std::cout << "state int= " << state << std::endl;
     std::cout << "LEFT     = " << ((state&LEFT) ? "True" : "False") << std::endl;
     std::cout << "RIGHT    = " << ((state&RIGHT) ? "True" : "False") << std::endl;
     std::cout << "UP       = " << ((state&UP) ? "True" : "False") << std::endl;
@@ -378,15 +404,87 @@ void Player::debugPrints() {
     std::cout << "X        = " << ((state&X) ? "True" : "False") << std::endl;
     std::cout << "POSED    = " << ((state&POSED) ? "True" : "False") << std::endl;
     std::cout << "THROWN   = " << ((state&THROWN) ? "True" : "False") << std::endl;
+    std::cout << "JUMP1    = " << ((state&JUMP1) ? "True" : "False") << std::endl;
+    std::cout << "JUMP2    = " << ((state&JUMP2) ? "True" : "False") << std::endl;
+    std::cout << "C        = " << ((state&C) ? "True" : "False") << std::endl;
     std::cout << "RETURN   = " << ((state&RETURN) ? "True" : "False") << "\n\n" << std::endl;
   }
 }
 
 void Player::handleKeyboard(sf::RenderWindow &Window) {
-  sf::Event event;
+    sf::Event event;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    {
+        state |= LEFT;
+    } else {
+        state |= LEFT;
+        state -= LEFT;
+    }
 
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    {
+        state |= RIGHT;
+    } else {
+        state |= RIGHT;
+        state -= RIGHT;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    {
+        state |= UP;
+    } else {
+        state |= UP;
+        state -= UP;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+    {
+        state |= DOWN;
+    } else {
+        state |= DOWN;
+        state -= DOWN;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && !(state&SPACE) && !(state&NOVA) && !(state&THROWN) && !(state&RETURN))
+    {
+        state |= SPACE;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
+        state |= C;
+    } else {
+        if (state & C) {
+           state |= JUMPED; // jumped is basically a key released event to allow the second jump
+        }
+        state |= C;
+        state -= C;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::X) && !(state&X) && !(state&THROWN) && !(state&RETURN) && (state & CANNOVA)) {
+        state |= SPACE;
+        state -= SPACE;
+
+        state -= CANNOVA;
+
+        state |= X;
+        if (!(state&NOVA)) {
+          state |= NOVA;
+        }
+    } else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
+        state |= X;
+        state -= X;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+        Window.close();
+    }
+    return;
+
+
+
+  return;
   while (Window.pollEvent(event))
   {
+    break;
       // check the type of the event...
       switch (event.type)
       {
@@ -398,24 +496,24 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
             }
               if (event.key.code == sf::Keyboard::Left)
               {
-                  this->state += LEFT;
+                  state |= LEFT;
               }
               if (event.key.code == sf::Keyboard::Right)
               {
-                  this->state += RIGHT;
+                  state |= RIGHT;
               }
               if (event.key.code == sf::Keyboard::Up)
               {
-                this->state += UP;
+                state |= UP;
               }
               if (event.key.code == sf::Keyboard::Down)
               {
-                  this->state += DOWN;
+                  state |= DOWN;
               }
               if (event.key.code == sf::Keyboard::Space && !(state&SPACE) && !(state&NOVA) && !(state&THROWN) && !(state&RETURN))
               {
 
-                  this->state += SPACE;
+                  state |= SPACE;
               }
               if (event.key.code == sf::Keyboard::X && !(state&X) && !(state&THROWN) && !(state&RETURN))
               {
@@ -423,14 +521,14 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
                   if (state&SPACE) {
                     state -= SPACE;
                   }
-                  this->state += X;
+                  state |= X;
                   if (!(state&NOVA)) {
-                    this->state += NOVA;
+                    state |= NOVA;
                   }
               }
               if (event.key.code == sf::Keyboard::C)
               {
-                  this->state += JUMP1;
+                  state |= JUMP1;
               }
               if (event.key.code == sf::Keyboard::Escape)
               {
@@ -440,28 +538,28 @@ void Player::handleKeyboard(sf::RenderWindow &Window) {
           case sf::Event::KeyReleased:
               if (event.key.code == sf::Keyboard::Left)
               {
-                  this->state -= LEFT;
+                  state -= LEFT;
               }
               if (event.key.code == sf::Keyboard::Right)
               {
-                  this->state -= RIGHT;
+                  state -= RIGHT;
               }
               if (event.key.code == sf::Keyboard::Up && (state&UP))
               {
-                this->state -= UP;
+                state -= UP;
               }
               if (event.key.code == sf::Keyboard::Down && (state&DOWN))
               {
-                  this->state -= DOWN;
+                  state -= DOWN;
               }
               if (event.key.code == sf::Keyboard::Space)
               {
-                  // this->state -= SPACE;
+                  // state -= SPACE;
               }
               if (event.key.code == sf::Keyboard::X && (state&X))
               {
 
-                  this->state -= X;
+                  state -= X;
               }
               break;
 

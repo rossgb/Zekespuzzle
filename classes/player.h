@@ -22,7 +22,10 @@ enum StateMask {
     POSED     = 0x400,
     THROWN    = 0x800,
     RETURN    = 0x1000,
-    JUMP1     = 0x2000
+    JUMP1     = 0x2000,
+    JUMP2     = 0x4000,
+    C         = 0x8000,
+    CANNOVA   = 0x10000
 
 };
 
