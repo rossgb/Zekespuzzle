@@ -1,6 +1,6 @@
 #ifndef ANIMATION_H
 #define  ANIMATION_H
-#endif
+
 
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
@@ -40,3 +40,4 @@ std::vector<sf::Texture> spriteList;
 
 
 };
+#endif

@@ -68,7 +68,7 @@ Player::Player(b2World& World) {
 
   //debug
   counter = 0;
-  debug = true;
+  debug = false;
   //debug
 
   //this is to count the number of frames nova hover lasts
@@ -239,7 +239,6 @@ void Player::handlePhysics() {
 
     if (state&THROWN && state&X) {
       // state |= CATCH;
-      std::cout <<"catch init"<<std::endl;
     }
     // if (state&CATCH && !(state&X)) {
     //   state -= CATCH;
@@ -304,6 +303,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
       if (novacounter > 30) {
         novacounter = 0;
         state -= NOVA;
+        currentAnimation->reset();
       }
       //when the last frame is reached, if X is still pressed, get the hoop ready to throw (POSED state)
       if (!(state&POSED)) state |= POSED;
@@ -365,7 +365,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
       currentAnimation = rising;
     } else if (state&INAIR && this->body->GetLinearVelocity().y>0) {
       currentAnimation = falling;
-    } else if (!(state & (INAIR|LEFT|RIGHT))) {
+    } else if (!(state & (INAIR|LEFT|RIGHT)) || (state&LEFT && state&RIGHT)) {
       currentAnimation = standing;
     } else {
       currentAnimation = walkLeft;

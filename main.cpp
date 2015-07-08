@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
 #include "classes/player.h"
+#include "classes/blueguy.h"
 #include <iostream>
 
 /** We need this to easily convert between pixel and real-world coordinates*/
@@ -16,6 +17,7 @@ int main()
 {
     /** Prepare the window */
     sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
+    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke");
     Window.setFramerateLimit(60);
 		Window.setKeyRepeatEnabled(false);
 
@@ -43,6 +45,9 @@ int main()
     sf::Texture BoxTexture;
 
 		Player player(World);
+
+    BlueGuy blueguy(World,player.body);
+
 
     while (Window.isOpen())
     {
@@ -78,7 +83,11 @@ int main()
         ground.setTextureRect(groundrect2);
         Window.draw(ground);
 				player.update(Window);
+        blueguy.update(Window);
 
+        std::cout << player.body->GetPosition().x << std::endl;
+        std::cout << blueguy.body->GetPosition().x << std::endl;
+        std::cout << b2Distance(player.body->GetPosition(),blueguy.body->GetPosition()) << std::endl;
 
 
         Window.display();
