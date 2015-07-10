@@ -6,6 +6,8 @@
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include "animation.h"
+#include "entity.h"
+#include "blueguy.h"
 
 enum StateMask {
     NONE      = 0x0,
@@ -32,10 +34,12 @@ enum StateMask {
 
 
 
-class Player {
+class Player: public Entity {
 public:
   Player(b2World& World);
   ~Player();
+
+  void handleCollision(Entity* other, int begin);
 
   void update(sf::RenderWindow &Window);
 

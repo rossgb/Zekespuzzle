@@ -3,6 +3,7 @@
 #include "classes/player.h"
 #include "classes/blueguy.h"
 #include <iostream>
+#include "classes/listener.h"
 
 /** We need this to easily convert between pixel and real-world coordinates*/
 static const float SCALE = 30.f;
@@ -16,19 +17,21 @@ void CreateBox(b2World& World, int MouseX, int MouseY);
 int main()
 {
     /** Prepare the window */
-    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
-    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke");
+    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
+    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke");
     Window.setFramerateLimit(60);
 		Window.setKeyRepeatEnabled(false);
 
     sf::View view(sf::FloatRect(0, 0, Window.getSize().x, Window.getSize().y));
     view.setSize(sf::Vector2f(1080*1.5, 720*1.5));
 
-
+    ContactListener listener;
 
     /** Prepare the world */
     b2Vec2 Gravity(0.f, 19.f);
     b2World World(Gravity, true);
+
+    World.SetContactListener(&listener);
     CreateGround(World, 600.f, 800.f, 1600.f, 16.f);
     CreateGround(World, 200.f, 250.f, 120.f, 20.f);
     CreateGround(World, 300.f, 500.f, 120.f, 20.f);
@@ -91,9 +94,9 @@ int main()
 				player.update(Window);
         blueguy.update(Window);
 
-        std::cout << player.body->GetPosition().x << std::endl;
-        std::cout << blueguy.body->GetPosition().x << std::endl;
-        std::cout << b2Distance(player.body->GetPosition(),blueguy.body->GetPosition()) << std::endl;
+        // std::cout << player.body->GetPosition().x << std::endl;
+        // std::cout << blueguy.body->GetPosition().x << std::endl;
+        // std::cout << b2Distance(player.body->GetPosition(),blueguy.body->GetPosition()) << std::endl;
 
 
         Window.display();

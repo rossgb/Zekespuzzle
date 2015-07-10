@@ -39,6 +39,9 @@ Player::Player(b2World& World) {
 
 
   this->body = World.CreateBody(&bodyDef);
+
+  body->SetUserData(this);
+
   this->hoop = World.CreateBody(&hoopDef);
 
 
@@ -48,6 +51,8 @@ Player::Player(b2World& World) {
   FixtureDef.density = 1.f;
   FixtureDef.friction = 5.f;
   FixtureDef.shape = &Shape;
+  FixtureDef.filter.categoryBits = 2;
+
   this->body->CreateFixture(&FixtureDef);
 
   b2CircleShape circle;
@@ -93,6 +98,12 @@ void Player::update(sf::RenderWindow &Window) {
   handleAnimation(Window);
   if (debug) debugPrints();
 
+}
+
+void Player::handleCollision(Entity* other, int begin) {
+  // body->ApplyLinearImpulse(b2Vec2(0,-100), body->GetWorldCenter());
+  // if (BlueGuy* bg = (BlueGuy*)other)
+  std::cout << "HIT THE DUDE" <<std::endl;
 }
 
 

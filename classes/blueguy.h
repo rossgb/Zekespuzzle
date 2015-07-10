@@ -1,11 +1,12 @@
-#ifndef PLAYER_H
-#define PLAYER_H
-#endif
+#ifndef BLUEGUY_H
+#define BLUEGUY_H
+
 
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include "animation.h"
+#include "entity.h"
 
 enum BlueStateMask {
     BNONE      = 0x20,
@@ -19,10 +20,13 @@ enum BlueStateMask {
 
 
 
-class BlueGuy {
+class BlueGuy: public Entity {
 public:
   BlueGuy(b2World& World, b2Body* playerbod);
   ~BlueGuy();
+
+  void handleCollision(Entity* other, int begin);
+  
 
   b2Body* player;
 
@@ -51,3 +55,4 @@ private:
 
 
 };
+#endif

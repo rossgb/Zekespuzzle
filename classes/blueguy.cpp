@@ -24,15 +24,23 @@ BlueGuy::BlueGuy(b2World& World, b2Body* playerbod) {
 
 
   this->body = World.CreateBody(&bodyDef);
-
+  body->SetUserData(this);
 
   b2PolygonShape Shape;
   Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
   b2FixtureDef FixtureDef;
+  FixtureDef.filter.categoryBits = 4;
+  FixtureDef.filter.maskBits = 0xFFFF-2;
   FixtureDef.density = 1.f;
   FixtureDef.friction = 5.f;
   FixtureDef.shape = &Shape;
   this->body->CreateFixture(&FixtureDef);
+
+  b2FixtureDef sensor;
+  sensor.isSensor = true;
+  sensor.shape = &Shape;
+  sensor.friction = 0.f;
+  this->body->CreateFixture(&sensor);
 
 
   state = BNONE;
@@ -54,9 +62,14 @@ void BlueGuy::update(sf::RenderWindow &Window) {
 
 }
 
+void BlueGuy::handleCollision(Entity* other, int begin) {
+  
+}
+
+
 void BlueGuy::handleState() {
   if (b2Distance(player->GetPosition(),body->GetPosition())<8) {
-    std::cout << "REMOVING BNONE" <<std::endl;
+    // std::cout << "REMOVING BNONE" <<std::endl;
 
     if (player->GetPosition().x>body->GetPosition().x) {
       state |= BRIGHT;
@@ -73,7 +86,7 @@ void BlueGuy::handleState() {
       state -= BNONE;
     }
   } else {
-    std::cout << "ADDING BNONE" <<std::endl;
+    // std::cout << "ADDING BNONE" <<std::endl;
 
     state |= BNONE;
     // state |= BRIGHT;
@@ -81,9 +94,9 @@ void BlueGuy::handleState() {
     // state |= BLEFT;
     // state -= BLEFT;
   }
-  std::cout << "bnone state = " << (state&BNONE ? "true" : "false") <<std::endl;
-  std::cout << "Right state = " << (state&BRIGHT ? "true" : "false") <<std::endl;
-  std::cout << "left state = " << (state&BLEFT ? "true" : "false") <<std::endl;
+  // std::cout << "bnone state = " << (state&BNONE ? "true" : "false") <<std::endl;
+  // std::cout << "Right state = " << (state&BRIGHT ? "true" : "false") <<std::endl;
+  // std::cout << "left state = " << (state&BLEFT ? "true" : "false") <<std::endl;
 
 }
 
@@ -115,7 +128,7 @@ void BlueGuy::handlePhysics() {
     }
     if (state&BRIGHT && !(state&BNONE)) {
 
-      std::cout << "WHAT" <<std::endl;
+      // std::cout << "WHAT" <<std::endl;
 
       this->body->ApplyForce( b2Vec2(force,0), this->body->GetWorldCenter() );
     }
