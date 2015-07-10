@@ -50,6 +50,8 @@ public:
   sf::Sprite hoopbacksp;
   sf::Sprite hoopfrontsp;
   int state;
+  int health;
+  bool canBeDamaged;
 
     //debug
     int counter;
@@ -59,6 +61,8 @@ public:
 
 private:
   int novacounter;
+  int dmgcounter;
+
   int hoopdir;
   float lastx;
   float lasty;

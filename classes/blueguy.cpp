@@ -30,7 +30,7 @@ BlueGuy::BlueGuy(b2World& World, b2Body* playerbod) {
   Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
   b2FixtureDef FixtureDef;
   FixtureDef.filter.categoryBits = 4;
-  FixtureDef.filter.maskBits = 0xFFFF-2;
+  FixtureDef.filter.maskBits = 1;
   FixtureDef.density = 1.f;
   FixtureDef.friction = 5.f;
   FixtureDef.shape = &Shape;
@@ -63,7 +63,7 @@ void BlueGuy::update(sf::RenderWindow &Window) {
 }
 
 void BlueGuy::handleCollision(Entity* other, int begin) {
-  
+
 }
 
 

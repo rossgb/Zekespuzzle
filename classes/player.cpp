@@ -62,8 +62,12 @@ Player::Player(b2World& World) {
   hoopFixDef.density = 0.f;
   hoopFixDef.friction = 0.f;
   hoopFixDef.shape = &circle;
-  hoopFixDef.isSensor = true;
+  hoopFixDef.isSensor = false;
+  hoopFixDef.filter.maskBits = 0xFFFF-2;
+  hoopFixDef.filter.categoryBits = 8;
+
   this->hoop->CreateFixture(&hoopFixDef);
+  hoop->SetUserData( this);
 
 
 
@@ -75,6 +79,10 @@ Player::Player(b2World& World) {
   counter = 0;
   debug = false;
   //debug
+
+  health = 100;
+  canBeDamaged = true;
+  dmgcounter = 0;
 
   //this is to count the number of frames nova hover lasts
   novacounter = 0;
@@ -93,6 +101,13 @@ void Player::update(sf::RenderWindow &Window) {
 
   handlePhysics();
 
+  if (!canBeDamaged) {
+    dmgcounter++;
+  }
+  if (dmgcounter >60) {
+    dmgcounter = 0;
+    canBeDamaged = true;
+  }
 
   //get textures from animator and render it to the players position
   handleAnimation(Window);
@@ -102,7 +117,7 @@ void Player::update(sf::RenderWindow &Window) {
 
 void Player::handleCollision(Entity* other, int begin) {
   // body->ApplyLinearImpulse(b2Vec2(0,-100), body->GetWorldCenter());
-  // if (BlueGuy* bg = (BlueGuy*)other)
+  if (BlueGuy* bg = (BlueGuy*)other)
   std::cout << "HIT THE DUDE" <<std::endl;
 }
 
