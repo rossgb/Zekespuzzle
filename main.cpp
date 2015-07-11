@@ -14,11 +14,13 @@ void CreateGround(b2World& World, float X, float Y, float width, float height);
 /** Create the boxes */
 void CreateBox(b2World& World, int MouseX, int MouseY);
 
+void debugPrints(sf::RenderWindow &Window, sf::View view);
+
 int main()
 {
     /** Prepare the window */
-    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
-    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke");
+    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
+    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke");
     Window.setFramerateLimit(60);
 		Window.setKeyRepeatEnabled(false);
 
@@ -97,13 +99,52 @@ int main()
         // std::cout << player.body->GetPosition().x << std::endl;
         // std::cout << blueguy.body->GetPosition().x << std::endl;
         // std::cout << b2Distance(player.body->GetPosition(),blueguy.body->GetPosition()) << std::endl;
-
+        debugPrints(Window, view);
 
         Window.display();
     }
 
 		return 0;
 }
+
+//WILL EXECUTE EVERY TIME THE COUNTER MEETS THE IF CONDITION
+//PUSH 'D' TO DISABLE/ENABLE
+void debugPrints(sf::RenderWindow &Window, sf::View view) {
+
+  sf::Font font;
+  font.loadFromFile("etc/FreeMono.ttf");
+  sf::Text text;
+  text.setFont(font);
+  text.setColor(sf::Color::Black);
+  text.setString("test");
+  text.setPosition(view.getCenter().x-view.getSize().x/2,view.getCenter().y-view.getSize().y/2);
+  Window.draw(text);
+  // if (counter>60) {
+  //   counter = 0;
+  //   std::cout << "hoop pos x = " << hoop->GetPosition().x<< std::endl;
+  //   std::cout << "player pos x = " << body->GetPosition().x<< std::endl;
+  //   std::cout << ((counter % 2 == 0) ? "PRINTING STATES" : "PRINTING STATES!") << std::endl;
+  //   std::cout << "state int= " << state << std::endl;
+  //   std::cout << "LEFT     = " << ((state&LEFT) ? "True" : "False") << std::endl;
+  //   std::cout << "RIGHT    = " << ((state&RIGHT) ? "True" : "False") << std::endl;
+  //   std::cout << "UP       = " << ((state&UP) ? "True" : "False") << std::endl;
+  //   std::cout << "DOWN     = " << ((state&DOWN) ? "True" : "False") << std::endl;
+  //   std::cout << "SPACE    = " << ((state&SPACE) ? "True" : "False") << std::endl;
+  //   std::cout << "INAIR    = " << ((state&INAIR) ? "True" : "False") << std::endl;
+  //   std::cout << "ATTACKING= " << ((state&ATTACKING) ? "True" : "False") << std::endl;
+  //   std::cout << "JUMPED   = " << ((state&JUMPED) ? "True" : "False") << std::endl;
+  //   std::cout << "NOVA     = " << ((state&NOVA) ? "True" : "False") << std::endl;
+  //   std::cout << "X        = " << ((state&X) ? "True" : "False") << std::endl;
+  //   std::cout << "POSED    = " << ((state&POSED) ? "True" : "False") << std::endl;
+  //   std::cout << "THROWN   = " << ((state&THROWN) ? "True" : "False") << std::endl;
+  //   std::cout << "JUMP1    = " << ((state&JUMP1) ? "True" : "False") << std::endl;
+  //   std::cout << "JUMP2    = " << ((state&JUMP2) ? "True" : "False") << std::endl;
+  //   std::cout << "C        = " << ((state&C) ? "True" : "False") << std::endl;
+  //   std::cout << "CATCH    = " << ((state&CATCH) ? "True" : "False") << std::endl;
+  //   std::cout << "RETURN   = " << ((state&RETURN) ? "True" : "False") << "\n\n" << std::endl;
+  // }
+}
+
 
 void CreateBox(b2World& World, int MouseX, int MouseY)
 {

@@ -62,7 +62,7 @@ void BlueGuy::update(sf::RenderWindow &Window) {
 
 }
 
-void BlueGuy::handleCollision(Entity* other, int begin) {
+void BlueGuy::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
 
 }
 

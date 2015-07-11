@@ -25,8 +25,8 @@ public:
   BlueGuy(b2World& World, b2Body* playerbod);
   ~BlueGuy();
 
-  void handleCollision(Entity* other, int begin);
-  
+  void handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix);
+
 
   b2Body* player;
 

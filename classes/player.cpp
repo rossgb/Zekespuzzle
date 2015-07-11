@@ -53,11 +53,11 @@ Player::Player(b2World& World) {
   FixtureDef.shape = &Shape;
   FixtureDef.filter.categoryBits = 2;
 
-  this->body->CreateFixture(&FixtureDef);
+  bodyfx = this->body->CreateFixture(&FixtureDef);
 
   b2CircleShape circle;
   // circle.m_p.Set(2.0/f, 3.0f);
-  circle.m_radius = (32.f/2)/SCALE;
+  circle.m_radius = (70.f/2)/SCALE;
   b2FixtureDef hoopFixDef;
   hoopFixDef.density = 0.f;
   hoopFixDef.friction = 0.f;
@@ -66,7 +66,7 @@ Player::Player(b2World& World) {
   hoopFixDef.filter.maskBits = 0xFFFF-2;
   hoopFixDef.filter.categoryBits = 8;
 
-  this->hoop->CreateFixture(&hoopFixDef);
+  hoopfx = this->hoop->CreateFixture(&hoopFixDef);
   hoop->SetUserData( this);
 
 
@@ -81,13 +81,19 @@ Player::Player(b2World& World) {
   //debug
 
   health = 100;
+  healthbar = sf::RectangleShape(sf::Vector2f(100,6));
+  healthbar.setFillColor(sf::Color::Red);
+  healthoutline = sf::RectangleShape(sf::Vector2f(106,12));
+  healthoutline.setFillColor(sf::Color::Black);
   canBeDamaged = true;
   dmgcounter = 0;
 
+  facing = 0;
+
   //this is to count the number of frames nova hover lasts
   novacounter = 0;
-  //the direction the hoop is thrown
   hoopdir = 0;
+  //the direction the hoop is thrown
 }
 Player::~Player() {}
 
@@ -109,16 +115,31 @@ void Player::update(sf::RenderWindow &Window) {
     canBeDamaged = true;
   }
 
+  if (health<0) {
+    //DIE();
+  }
+
   //get textures from animator and render it to the players position
   handleAnimation(Window);
-  if (debug) debugPrints();
 
 }
 
-void Player::handleCollision(Entity* other, int begin) {
+void Player::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
   // body->ApplyLinearImpulse(b2Vec2(0,-100), body->GetWorldCenter());
-  if (BlueGuy* bg = (BlueGuy*)other)
-  std::cout << "HIT THE DUDE" <<std::endl;
+  if (BlueGuy* bg = (BlueGuy*)other) {
+    if(thisFix == hoopfx && state&(THROWN|SPACE)) {
+      std::cout << "HIT THE DUDE" <<std::endl;
+      bg->body->ApplyLinearImpulse(b2Vec2(0,-10),bg->body->GetWorldCenter());
+    } else if (thisFix == bodyfx) {
+      std::cout << "HIT THE HOOP" <<std::endl;
+      if (canBeDamaged) {
+        body->ApplyLinearImpulse(b2Vec2(-body->GetLinearVelocity().x-facing*7,-body->GetLinearVelocity().y-5), body->GetWorldCenter());
+        health -= 20;
+        canBeDamaged = false;
+      }
+    }
+
+  }
 }
 
 
@@ -380,6 +401,9 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
     currentAnimation=slashLeft;
     currentAnimation->start();
   }
+  if (state&SPACE && (currentAnimation->currentFrame==2)) {
+    hoop->SetTransform(b2Vec2(hoop->GetPosition().x+facing*2,hoop->GetPosition().y),0);
+  }
   if (state&SPACE && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==5)) {
     currentAnimation->reset();
     state -= SPACE;
@@ -426,14 +450,22 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
   if (!(state&CATCH)) {
   if (state&LEFT) {
     sprite.setScale(-1.f,1.f);
+    facing = -1;
   }
   if (state&RIGHT) {
+    facing = 1;
     sprite.setScale(1.f,1.f);
   }
 }
 
   Window.draw(sprite);
 
+  healthoutline.setPosition(sf::Vector2f(body->GetPosition().x*SCALE-53,body->GetPosition().y*SCALE-63));
+  healthbar.setPosition(sf::Vector2f(body->GetPosition().x*SCALE-50,body->GetPosition().y*SCALE-60));
+  healthbar.setSize(sf::Vector2f((health<0 ? 0 : health),6));
+
+  Window.draw(healthoutline);
+  Window.draw(healthbar);
 
 
   //FRONT HOOP
@@ -458,36 +490,6 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
 
 void Player::handleState() {
 
-}
-
-//WILL EXECUTE EVERY TIME THE COUNTER MEETS THE IF CONDITION
-//PUSH 'D' TO DISABLE/ENABLE
-void Player::debugPrints() {
-  counter++;
-  if (counter>60) {
-    counter = 0;
-    std::cout << "hoop pos x = " << hoop->GetPosition().x<< std::endl;
-    std::cout << "player pos x = " << body->GetPosition().x<< std::endl;
-    std::cout << ((counter % 2 == 0) ? "PRINTING STATES" : "PRINTING STATES!") << std::endl;
-    std::cout << "state int= " << state << std::endl;
-    std::cout << "LEFT     = " << ((state&LEFT) ? "True" : "False") << std::endl;
-    std::cout << "RIGHT    = " << ((state&RIGHT) ? "True" : "False") << std::endl;
-    std::cout << "UP       = " << ((state&UP) ? "True" : "False") << std::endl;
-    std::cout << "DOWN     = " << ((state&DOWN) ? "True" : "False") << std::endl;
-    std::cout << "SPACE    = " << ((state&SPACE) ? "True" : "False") << std::endl;
-    std::cout << "INAIR    = " << ((state&INAIR) ? "True" : "False") << std::endl;
-    std::cout << "ATTACKING= " << ((state&ATTACKING) ? "True" : "False") << std::endl;
-    std::cout << "JUMPED   = " << ((state&JUMPED) ? "True" : "False") << std::endl;
-    std::cout << "NOVA     = " << ((state&NOVA) ? "True" : "False") << std::endl;
-    std::cout << "X        = " << ((state&X) ? "True" : "False") << std::endl;
-    std::cout << "POSED    = " << ((state&POSED) ? "True" : "False") << std::endl;
-    std::cout << "THROWN   = " << ((state&THROWN) ? "True" : "False") << std::endl;
-    std::cout << "JUMP1    = " << ((state&JUMP1) ? "True" : "False") << std::endl;
-    std::cout << "JUMP2    = " << ((state&JUMP2) ? "True" : "False") << std::endl;
-    std::cout << "C        = " << ((state&C) ? "True" : "False") << std::endl;
-    std::cout << "CATCH    = " << ((state&CATCH) ? "True" : "False") << std::endl;
-    std::cout << "RETURN   = " << ((state&RETURN) ? "True" : "False") << "\n\n" << std::endl;
-  }
 }
 
 void Player::handleKeyboard(sf::RenderWindow &Window) {

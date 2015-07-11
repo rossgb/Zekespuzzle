@@ -39,12 +39,14 @@ public:
   Player(b2World& World);
   ~Player();
 
-  void handleCollision(Entity* other, int begin);
+  void handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix);
 
   void update(sf::RenderWindow &Window);
 
   b2Body* body;
   b2Body* hoop;
+  b2Fixture* hoopfx;
+  b2Fixture* bodyfx;
   int i;
   sf::Sprite sprite;
   sf::Sprite hoopbacksp;
@@ -52,14 +54,18 @@ public:
   int state;
   int health;
   bool canBeDamaged;
+  int facing;
 
     //debug
     int counter;
     bool debug;
-    void debugPrints();
     //debug
 
 private:
+  //healthbar STUFF
+  sf::RectangleShape healthbar;
+  sf::RectangleShape healthoutline;
+
   int novacounter;
   int dmgcounter;
 

@@ -17,8 +17,8 @@ class ContactListener : public b2ContactListener
       Entity* B = NULL;
       if( (A = (Entity*)contact->GetFixtureA()->GetBody()->GetUserData()) &&
       (B = (Entity*)contact->GetFixtureB()->GetBody()->GetUserData()) ) {
-        A->handleCollision(B,1);
-        B->handleCollision(A,1);
+        A->handleCollision(B,1,contact->GetFixtureA(),contact->GetFixtureB());
+        B->handleCollision(A,1,contact->GetFixtureB(),contact->GetFixtureA());
       }
 
 
@@ -29,8 +29,8 @@ class ContactListener : public b2ContactListener
       Entity* B = NULL;
       if( (A = (Entity*)contact->GetFixtureA()->GetBody()->GetUserData()) &&
       (B = (Entity*)contact->GetFixtureB()->GetBody()->GetUserData()) ) {
-        A->handleCollision(B,0);
-        B->handleCollision(A,0);
+        A->handleCollision(B,0,contact->GetFixtureA(),contact->GetFixtureB());
+        B->handleCollision(A,0,contact->GetFixtureB(),contact->GetFixtureA());
       }
 
     }
