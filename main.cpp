@@ -53,7 +53,7 @@ int main()
 
     BlueGuy blueguy(World,player.body);
 
-
+    int mystupidchecker = 1;
     while (Window.isOpen())
     {
 
@@ -95,6 +95,12 @@ int main()
         Window.draw(ground);
 				player.update(Window);
         blueguy.update(Window);
+        if (mystupidchecker ==1) {
+          if (blueguy.state&BDEAD) {
+            World.DestroyBody(blueguy.body);
+            mystupidchecker = 0;
+          }
+        }
 
         // std::cout << player.body->GetPosition().x << std::endl;
         // std::cout << blueguy.body->GetPosition().x << std::endl;

@@ -130,8 +130,9 @@ void Player::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fix
     if(thisFix == hoopfx && state&(THROWN|SPACE)) {
       std::cout << "HIT THE DUDE" <<std::endl;
       bg->body->ApplyLinearImpulse(b2Vec2(0,-10),bg->body->GetWorldCenter());
+      bg->health--;
     } else if (thisFix == bodyfx) {
-      std::cout << "HIT THE HOOP" <<std::endl;
+      std::cout << "GOT HURT" <<std::endl;
       if (canBeDamaged) {
         body->ApplyLinearImpulse(b2Vec2(-body->GetLinearVelocity().x-facing*7,-body->GetLinearVelocity().y-5), body->GetWorldCenter());
         health -= 20;

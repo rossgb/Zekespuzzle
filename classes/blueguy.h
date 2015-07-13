@@ -6,6 +6,7 @@
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include "animation.h"
+#include "orb.h"
 #include "entity.h"
 
 enum BlueStateMask {
@@ -14,7 +15,9 @@ enum BlueStateMask {
     BRIGHT     = 0x2,
     BUP        = 0x4,
     BINAIR     = 0x8,
-    BJUMP      = 0x10
+    BJUMP      = 0x10,
+    BDIE       = 0x40,
+    BDEAD      = 0x80
 
 };
 
@@ -32,7 +35,9 @@ public:
 
   void update(sf::RenderWindow &Window);
 
+
   b2Body* body;
+  int health;
   int i;
   sf::Sprite sprite;
   int state;
@@ -46,6 +51,7 @@ private:
   animation* standing;
 
   animation* walkLeft;
+  animation* die;
 
 
   void handleState();                             //resolves conflicting states

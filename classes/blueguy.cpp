@@ -9,6 +9,7 @@ BlueGuy::BlueGuy(b2World& World, b2Body* playerbod) {
   rising = new animation("bluejump");
   standing = new animation("blueguy/blue", 8,20);
   walkLeft = new animation("bluewalk/bluewalk", 4, 15);
+  die = new animation("bluedeath/bluedeath", 6, 8);
 
   player = playerbod;
 
@@ -44,12 +45,14 @@ BlueGuy::BlueGuy(b2World& World, b2Body* playerbod) {
 
 
   state = BNONE;
+  health = 3;
 
 }
 BlueGuy::~BlueGuy() {}
 
 void BlueGuy::update(sf::RenderWindow &Window) {
   //handle keyboard
+  if (!(state&BDEAD)) {
   currentAnimation->update();
 
   handleState();
@@ -59,6 +62,7 @@ void BlueGuy::update(sf::RenderWindow &Window) {
 
   //get textures from animator and render it to the players position
   handleAnimation(Window);
+}
 
 }
 
@@ -93,6 +97,9 @@ void BlueGuy::handleState() {
     // state -= BRIGHT;
     // state |= BLEFT;
     // state -= BLEFT;
+  }
+  if (health <= 0) {
+    state |= BDIE;
   }
   // std::cout << "bnone state = " << (state&BNONE ? "true" : "false") <<std::endl;
   // std::cout << "Right state = " << (state&BRIGHT ? "true" : "false") <<std::endl;
@@ -175,6 +182,10 @@ void BlueGuy::handlePhysics() {
       this->body->SetLinearVelocity(b2Vec2(-6,this->body->GetLinearVelocity().y));
     }
 
+    if (state&BDIE) {
+      body->SetLinearVelocity(b2Vec2(0,0));
+    }
+
 }
 
 void BlueGuy::handleAnimation(sf::RenderWindow &Window) {
@@ -190,6 +201,18 @@ void BlueGuy::handleAnimation(sf::RenderWindow &Window) {
   if (state&BNONE) {
     currentAnimation = standing;
   }
+
+  if (state&BDIE) {
+    currentAnimation = die;
+    if (currentAnimation->currentFrame == 1 && currentAnimation->frameCount == 6) {
+      currentAnimation->frameCount++;
+      currentAnimation->stop();
+      state |= BDEAD;
+      Orb* o = new Orb(body, (int)body->GetPosition().x, (int)body->GetPosition().y);
+    }
+  }
+
+
 
   currentAnimation->start();
 
@@ -207,8 +230,9 @@ void BlueGuy::handleAnimation(sf::RenderWindow &Window) {
     sprite.setScale(1.f,1.f);
   }
 
-
-  Window.draw(sprite);
+  if (!(state&BDEAD)) {
+    Window.draw(sprite);
+  }
 
 
 
