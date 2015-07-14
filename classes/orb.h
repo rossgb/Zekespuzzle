@@ -24,6 +24,7 @@ public:
   int i;
   sf::Sprite sprite;
   int state;
+  int orb;
 
     //debug
     //debug

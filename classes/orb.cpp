@@ -21,10 +21,10 @@ Orb::Orb(b2Body* ref,int x, int y) {
 
   b2CircleShape circle;
   // circle.m_p.Set(2.0/f, 3.0f);
-  circle.m_radius = (36.f/2)/SCALE;
+  circle.m_radius = (18.f/2)/SCALE;
   b2FixtureDef FixtureDef;
   FixtureDef.density = 0.5f;
-  FixtureDef.friction = 0.5f;
+  FixtureDef.friction = 0.1f;
   FixtureDef.shape = &circle;
   this->body->CreateFixture(&FixtureDef);
 
@@ -38,14 +38,23 @@ Orb::Orb(b2Body* ref,int x, int y) {
   tex.loadFromFile("MainSprites/basic/orb.png");
 
   sprite.setTexture(tex);
-    sprite.setOrigin(16.f, 16.f);
+    sprite.setOrigin(18.f, 18.f);
 
+orb=1;
 
 }
 Orb::~Orb() {}
 
 void Orb::update(sf::RenderWindow &Window) {
   //handle keyboard
+  body->SetLinearVelocity(b2Vec2(body->GetLinearVelocity().x/1.05,body->GetLinearVelocity().y));
+  body->SetAngularVelocity(body->GetAngularVelocity());
+
+  sf::Texture tex;
+  tex.loadFromFile("MainSprites/basic/orb.png");
+
+  sprite.setTexture(tex);
+    sprite.setOrigin(18.f, 18.f);
 
 sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetPosition().y);
   sprite.setRotation(this->body->GetAngle() * 180/b2_pi);

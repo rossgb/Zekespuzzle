@@ -126,7 +126,7 @@ void Player::update(sf::RenderWindow &Window) {
 
 void Player::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
   // body->ApplyLinearImpulse(b2Vec2(0,-100), body->GetWorldCenter());
-  if (BlueGuy* bg = (BlueGuy*)other) {
+  if (BlueGuy* bg = dynamic_cast<BlueGuy*>(other)) {
     if(thisFix == hoopfx && state&(THROWN|SPACE)) {
       std::cout << "HIT THE DUDE" <<std::endl;
       bg->body->ApplyLinearImpulse(b2Vec2(0,-10),bg->body->GetWorldCenter());

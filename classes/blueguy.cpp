@@ -204,11 +204,14 @@ void BlueGuy::handleAnimation(sf::RenderWindow &Window) {
 
   if (state&BDIE) {
     currentAnimation = die;
+    if (currentAnimation->currentFrame == 3 && currentAnimation->frameCount == 1) {
+      currentAnimation->frameCount++;
+      Orb* o = new Orb(body, (int)body->GetPosition().x, (int)body->GetPosition().y+.5);
+    }
     if (currentAnimation->currentFrame == 1 && currentAnimation->frameCount == 6) {
       currentAnimation->frameCount++;
       currentAnimation->stop();
       state |= BDEAD;
-      Orb* o = new Orb(body, (int)body->GetPosition().x, (int)body->GetPosition().y);
     }
   }
 
