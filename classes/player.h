@@ -8,6 +8,7 @@
 #include "animation.h"
 #include "entity.h"
 #include "blueguy.h"
+#include "hoop.h"
 
 enum StateMask {
     NONE      = 0x0,
@@ -44,9 +45,11 @@ public:
   void update(sf::RenderWindow &Window);
 
   b2Body* body;
-  b2Body* hoop;
+  Hoop* hoop;
   b2Fixture* hoopfx;
   b2Fixture* bodyfx;
+  b2Filter nocol;
+  b2Filter attackcol;
   int i;
   sf::Sprite sprite;
   sf::Sprite hoopbacksp;

@@ -1,42 +1,30 @@
-#ifndef ANIMATION_H
-#define  ANIMATION_H
+#ifndef HOOP_H
+#define HOOP_H
 #endif
 
-#include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
-#include <vector>
-#include <iostream>
+#include <SFML/Graphics.hpp>
+#include <sstream>
+#include "entity.h"
+#include "blueguy.h"
 
 
-class animation {
+
+
+class Hoop: public Entity {
 public:
-  animation();
-  animation(std::string type);
+  Hoop(b2World& World);
+  ~Hoop();
 
-  animation(std::string type, int i, int delay);
+  void handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix);
 
-  void start();
+  void update(sf::RenderWindow &Window);
 
-  void stop();
+  b2Body* body;
+  b2Fixture* hoopfx;
 
-  void restart();
-
-  void reset();
-
-  sf::Texture* getTexture();
-
-  void update();
-
-std::vector<sf::Texture> spriteList;
-
+    //debug
 private:
-  int frameCount;
-  int frameDelay;
-  int currentFrame;
-  int animationDirection;
-  int totalFrames;
-
-  bool stopped;
 
 
 };

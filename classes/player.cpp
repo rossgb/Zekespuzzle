@@ -31,18 +31,13 @@ Player::Player(b2World& World) {
   bodyDef.angle = 0; //set the starting angle
   bodyDef.fixedRotation = true;
 
-  b2BodyDef hoopDef;
-  hoopDef.type = b2_kinematicBody;
-  hoopDef.position.Set(5,5);
-  hoopDef.angle = 0;
-  hoopDef.fixedRotation = true;
 
 
   this->body = World.CreateBody(&bodyDef);
 
   body->SetUserData(this);
 
-  this->hoop = World.CreateBody(&hoopDef);
+  hoop = new Hoop(World);
 
 
   b2PolygonShape Shape;
@@ -66,9 +61,14 @@ Player::Player(b2World& World) {
   hoopFixDef.filter.maskBits = 0xFFFF-2;
   hoopFixDef.filter.categoryBits = 8;
 
-  hoopfx = this->hoop->CreateFixture(&hoopFixDef);
-  hoop->SetUserData( this);
+  hoopfx = hoop->body->CreateFixture(&hoopFixDef);
 
+
+  
+
+  nocol.categoryBits = attackcol.categoryBits = 8;
+  nocol.maskBits = 0;
+  attackcol.maskBits = 0xFFFF-2;
 
 
   state = NONE;
@@ -127,18 +127,13 @@ void Player::update(sf::RenderWindow &Window) {
 void Player::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
   // body->ApplyLinearImpulse(b2Vec2(0,-100), body->GetWorldCenter());
   if (BlueGuy* bg = dynamic_cast<BlueGuy*>(other)) {
-    if(thisFix == hoopfx && state&(THROWN|SPACE)) {
-      std::cout << "HIT THE DUDE" <<std::endl;
-      bg->body->ApplyLinearImpulse(b2Vec2(0,-10),bg->body->GetWorldCenter());
-      bg->health--;
-    } else if (thisFix == bodyfx) {
       std::cout << "GOT HURT" <<std::endl;
       if (canBeDamaged) {
         body->ApplyLinearImpulse(b2Vec2(-body->GetLinearVelocity().x-facing*7,-body->GetLinearVelocity().y-5), body->GetWorldCenter());
         health -= 20;
         canBeDamaged = false;
       }
-    }
+
 
   }
 }
@@ -231,39 +226,39 @@ void Player::handlePhysics() {
 
     //-------HOOP STUFF-----------
     //detect when the returning hoop is on the character to catch it
-    if (b2Distance(body->GetPosition(),hoop->GetPosition())<0.9 && state&RETURN) {
+    if (b2Distance(body->GetPosition(),hoop->body->GetPosition())<0.9 && state&RETURN) {
       state -= RETURN;
     }
 
     //follow the character around
     if (!(state&THROWN) && !(state&RETURN)) {
-      hoop->SetTransform(b2Vec2(lastx/SCALE,lasty/SCALE),0);
+      hoop->body->SetTransform(b2Vec2(lastx/SCALE,lasty/SCALE),0);
       hooporigin.x = lastx/SCALE;
       hooporigin.y = lasty/SCALE;
     } else if (state&RETURN) {  //the hoop velocity returning to the character
-      b2Vec2 h = hoop->GetPosition();
+      b2Vec2 h = hoop->body->GetPosition();
       b2Vec2 b = body->GetPosition();
       b2Vec2 dir = b2Vec2(b.x-h.x,b.y-h.y);
       dir.Normalize(); dir.x *= 13; dir.y *= 13;
-      hoop->SetLinearVelocity(b2Vec2((b.x-h.x)*5,(b.y-h.y)*5)+(dir));
+      hoop->body->SetLinearVelocity(b2Vec2((b.x-h.x)*5,(b.y-h.y)*5)+(dir));
     } else { //the velocity when the hoop is thrown
       switch (hoopdir){
         case 0:
-        this->hoop->SetLinearVelocity(b2Vec2(20,-0.1)); break;
+        this->hoop->body->SetLinearVelocity(b2Vec2(20,-0.1)); break;
         // hoop->SetTransform(b2Vec2(hoop->GetPosition().x+8,hoop->GetPosition().y),0);
-        case 1:this->hoop->SetLinearVelocity(b2Vec2(20,20)); break;
-        case 2:this->hoop->SetLinearVelocity(b2Vec2(0,20)); break;
-        case 3:this->hoop->SetLinearVelocity(b2Vec2(-20,20)); break;
-        case 4:this->hoop->SetLinearVelocity(b2Vec2(-20,-.1)); break;
-        case 5:this->hoop->SetLinearVelocity(b2Vec2(-20,-20)); break;
-        case 6:this->hoop->SetLinearVelocity(b2Vec2(0,-20)); break;
-        case 7:this->hoop->SetLinearVelocity(b2Vec2(20,-20)); break;
+        case 1:this->hoop->body->SetLinearVelocity(b2Vec2(20,20)); break;
+        case 2:this->hoop->body->SetLinearVelocity(b2Vec2(0,20)); break;
+        case 3:this->hoop->body->SetLinearVelocity(b2Vec2(-20,20)); break;
+        case 4:this->hoop->body->SetLinearVelocity(b2Vec2(-20,-.1)); break;
+        case 5:this->hoop->body->SetLinearVelocity(b2Vec2(-20,-20)); break;
+        case 6:this->hoop->body->SetLinearVelocity(b2Vec2(0,-20)); break;
+        case 7:this->hoop->body->SetLinearVelocity(b2Vec2(20,-20)); break;
         case 8:state -= THROWN; break;
       }
     }
 
     //if the hoop has travelled sufficient distance, start returning
-    if (((hoop->GetPosition().x)-hooporigin.x)*((hoop->GetPosition().x)-hooporigin.x) + ((hoop->GetPosition().y)-hooporigin.y)*((hoop->GetPosition().y)-hooporigin.y) > 200 && (state&THROWN)) {
+    if (((hoop->body->GetPosition().x)-hooporigin.x)*((hoop->body->GetPosition().x)-hooporigin.x) + ((hoop->body->GetPosition().y)-hooporigin.y)*((hoop->body->GetPosition().y)-hooporigin.y) > 200 && (state&THROWN)) {
       if(state&CATCH) {
         state -= CATCH;
         switch (hoopdir){
@@ -294,7 +289,7 @@ void Player::handlePhysics() {
     // }
 
     if (state&CATCH) {
-      body->SetLinearVelocity(hoop->GetLinearVelocity());
+      body->SetLinearVelocity(hoop->body->GetLinearVelocity());
     }
 }
 
@@ -318,7 +313,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
     hoopbacksp.setTextureRect(sf::Rect<int>(0,0,160,66));
   }
 
-  hoopbacksp.setPosition(SCALE * hoop->GetPosition().x,SCALE * hoop->GetPosition().y);
+  hoopbacksp.setPosition(SCALE * hoop->body->GetPosition().x,SCALE * hoop->body->GetPosition().y);
   if (state&LEFT) {
     hoopbacksp.setScale(-1.f,1.f);
   }
@@ -403,7 +398,7 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
     currentAnimation->start();
   }
   if (state&SPACE && (currentAnimation->currentFrame==2)) {
-    hoop->SetTransform(b2Vec2(hoop->GetPosition().x+facing*2,hoop->GetPosition().y),0);
+    hoop->body->SetTransform(b2Vec2(hoop->body->GetPosition().x+facing*2,hoop->body->GetPosition().y),0);
   }
   if (state&SPACE && (currentAnimation->currentFrame==1) && (currentAnimation->frameCount==5)) {
     currentAnimation->reset();
@@ -490,7 +485,11 @@ void Player::handleAnimation(sf::RenderWindow &Window) {
 }
 
 void Player::handleState() {
-
+  if (state&NOVA || state&SPACE || state&THROWN) {
+    hoopfx->SetFilterData(attackcol);
+  } else {
+    hoopfx->SetFilterData(nocol);
+  }
 }
 
 void Player::handleKeyboard(sf::RenderWindow &Window) {
