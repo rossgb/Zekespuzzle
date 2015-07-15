@@ -5,7 +5,7 @@
 
 static const float SCALE = 30.f;
 
-BlueGuy::BlueGuy(b2World& World, b2Body* playerbod) {
+BlueGuy::BlueGuy(b2World& World, b2Body* playerbod, int x , int y ) {
   rising = new animation("bluejump");
   standing = new animation("blueguy/blue", 8,20);
   walkLeft = new animation("bluewalk/bluewalk", 4, 15);

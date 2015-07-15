@@ -50,7 +50,7 @@ public:
   b2Fixture* bodyfx;
   b2Filter nocol;
   b2Filter attackcol;
-  int i;
+    int i;
   sf::Sprite sprite;
   sf::Sprite hoopbacksp;
   sf::Sprite hoopfrontsp;

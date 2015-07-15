@@ -16,6 +16,10 @@ void CreateBox(b2World& World, int MouseX, int MouseY);
 
 void debugPrints(sf::RenderWindow &Window, sf::View view);
 
+void handleInput(b2World& World, Player player, sf::RenderWindow &Window);
+
+int counter;
+
 int main()
 {
     /** Prepare the window */
@@ -107,17 +111,27 @@ int main()
           }
         }
 
+        counter++;
         // std::cout << player.body->GetPosition().x << std::endl;
         // std::cout << blueguy.body->GetPosition().x << std::endl;
         // std::cout << b2Distance(player.body->GetPosition(),blueguy.body->GetPosition()) << std::endl;
         debugPrints(Window, view);
-
+        handleInput(World, player, Window);
         Window.display();
     }
 
 		return 0;
 }
 
+void handleInput(b2World& World, Player player, sf::RenderWindow &Window) {
+  if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+  {
+      if (counter>60) {
+      BlueGuy* bg = new BlueGuy(World, player.body, sf::Mouse::getPosition(Window).x, sf::Mouse::getPosition(Window).y);
+      counter = 0;
+    }
+  }
+}
 //WILL EXECUTE EVERY TIME THE COUNTER MEETS THE IF CONDITION
 //PUSH 'D' TO DISABLE/ENABLE
 void debugPrints(sf::RenderWindow &Window, sf::View view) {

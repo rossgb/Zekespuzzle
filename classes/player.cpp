@@ -64,7 +64,7 @@ Player::Player(b2World& World) {
   hoopfx = hoop->body->CreateFixture(&hoopFixDef);
 
 
-  
+
 
   nocol.categoryBits = attackcol.categoryBits = 8;
   nocol.maskBits = 0;
@@ -128,7 +128,7 @@ void Player::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fix
   // body->ApplyLinearImpulse(b2Vec2(0,-100), body->GetWorldCenter());
   if (BlueGuy* bg = dynamic_cast<BlueGuy*>(other)) {
       std::cout << "GOT HURT" <<std::endl;
-      if (canBeDamaged) {
+      if (canBeDamaged && !(bg->state&BDIE)) {
         body->ApplyLinearImpulse(b2Vec2(-body->GetLinearVelocity().x-facing*7,-body->GetLinearVelocity().y-5), body->GetWorldCenter());
         health -= 20;
         canBeDamaged = false;

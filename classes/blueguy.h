@@ -25,7 +25,7 @@ enum BlueStateMask {
 
 class BlueGuy: public Entity {
 public:
-  BlueGuy(b2World& World, b2Body* playerbod);
+  BlueGuy(b2World& World, b2Body* playerbod, int x = 5, int y =5);
   ~BlueGuy();
 
   void handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix);
