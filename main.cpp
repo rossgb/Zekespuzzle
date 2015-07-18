@@ -115,8 +115,8 @@ int main()
         // std::cout << player.body->GetPosition().x << std::endl;
         // std::cout << blueguy.body->GetPosition().x << std::endl;
         // std::cout << b2Distance(player.body->GetPosition(),blueguy.body->GetPosition()) << std::endl;
-        debugPrints(Window, view);
-        handleInput(World, player, Window);
+        //debugPrints(Window, view);
+        //handleInput(World, player, Window);
         Window.display();
     }
 
