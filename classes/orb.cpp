@@ -48,7 +48,7 @@ Orb::~Orb() {}
 void Orb::update(sf::RenderWindow &Window) {
   //handle keyboard
   body->SetLinearVelocity(b2Vec2(body->GetLinearVelocity().x/1.05,body->GetLinearVelocity().y));
-  body->SetAngularVelocity(body->GetAngularVelocity());
+  body->SetAngularVelocity(body->GetAngularVelocity()/1.05);
 
   sf::Texture tex;
   tex.loadFromFile("MainSprites/basic/orb.png");

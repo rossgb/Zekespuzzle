@@ -97,17 +97,17 @@ int main()
         ground.setPosition(0.f,860.f);
         ground.setTextureRect(groundrect2);
         Window.draw(ground);
-        if (mystupidchecker ==1) {
-          if (blueguy.state&BDEAD) {
-            World.DestroyBody(blueguy.body);
-            mystupidchecker = 0;
-          }
-        }
 
         for (b2Body* b = World.GetBodyList(); b; b = b->GetNext()) {
           Entity* cur;
           if (cur = (Entity*)b->GetUserData()) {
             cur->update(Window);
+
+            if (BlueGuy* bg = dynamic_cast<BlueGuy*>(cur)) {
+              if (bg->state&BDEAD) {
+              World.DestroyBody(bg->body);
+            }
+            }
           }
         }
 
