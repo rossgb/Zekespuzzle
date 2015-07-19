@@ -4,6 +4,7 @@
 #include "classes/blueguy.h"
 #include <iostream>
 #include "classes/listener.h"
+#include "classes/emitter.h"
 
 /** We need this to easily convert between pixel and real-world coordinates*/
 static const float SCALE = 30.f;
@@ -23,8 +24,8 @@ int counter;
 int main()
 {
     /** Prepare the window */
-    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
-    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke");
+    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
+    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke");
     Window.setFramerateLimit(60);
 		Window.setKeyRepeatEnabled(false);
 
@@ -58,11 +59,13 @@ int main()
     BlueGuy blueguy(World,player.body);
 
     int mystupidchecker = 1;
+
+    emitter particles = emitter(1000);
     while (Window.isOpen())
     {
 
         World.Step(1/60.f, 8, 3);
-        int darkness = player.body->GetPosition().y/10.f;
+        int darkness = player.body->GetPosition().y*3.f;
         int r = 101-darkness;
         int g = 191-darkness;
         int b = 214-darkness;
@@ -112,11 +115,18 @@ int main()
         }
 
         counter++;
+
+
+        particles.update();
+        particles.setEmitter(player.body->GetPosition().x*30,player.body->GetPosition().y*30);
+        Window.draw(particles);
+
+
         // std::cout << player.body->GetPosition().x << std::endl;
         // std::cout << blueguy.body->GetPosition().x << std::endl;
         // std::cout << b2Distance(player.body->GetPosition(),blueguy.body->GetPosition()) << std::endl;
-        //debugPrints(Window, view);
-        //handleInput(World, player, Window);
+        debugPrints(Window, view);
+        handleInput(World, player, Window);
         Window.display();
     }
 
