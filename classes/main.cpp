@@ -1,10 +1,12 @@
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
-#include "classes/player.h"
-#include "classes/blueguy.h"
 #include <iostream>
-#include "classes/listener.h"
-#include "classes/emitter.h"
+#include <sstream>
+#include "player.h"
+#include "blueguy.h"
+#include "listener.h"
+#include "emitter.h"
+#include "level.h"
 
 /** We need this to easily convert between pixel and real-world coordinates*/
 static const float SCALE = 30.f;
@@ -15,19 +17,21 @@ void CreateGround(b2World& World, float X, float Y, float width, float height);
 /** Create the boxes */
 void CreateBox(b2World& World, int MouseX, int MouseY);
 
-void debugPrints(sf::RenderWindow &Window, sf::View view);
+void debugPrints(sf::RenderWindow &Window, sf::View view, float fps);
 
-void handleInput(b2World& World, Player player, sf::RenderWindow &Window);
+void handleInput(b2World& World, Player &player, sf::RenderWindow &Window);
 
 int counter;
+
+sf::Font font;
 
 int main()
 {
     /** Prepare the window */
     // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
-    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke");
+    sf::RenderWindow Window(sf::VideoMode(640, 480, 1), "Zeke");
     Window.setFramerateLimit(60);
-		Window.setKeyRepeatEnabled(false);
+		//Window.setKeyRepeatEnabled(false);
 
     sf::View view(sf::FloatRect(0, 0, Window.getSize().x, Window.getSize().y));
     view.setSize(sf::Vector2f(1080*1.5, 720*1.5));
@@ -39,17 +43,13 @@ int main()
     b2World World(Gravity, true);
 
     World.SetContactListener(&listener);
-    CreateGround(World, 600.f, 800.f, 1600.f, 16.f);
-    CreateGround(World, 200.f, 250.f, 120.f, 20.f);
-    CreateGround(World, 300.f, 500.f, 120.f, 20.f);
-    /** Prepare textures */
 
-    sf::Texture GroundTexture;
-    GroundTexture.loadFromFile("MainSprites/ground/groundtiles_0001_Layer-6.png");
-    GroundTexture.setRepeated(true);
-    sf::Texture GroundTexture2;
-    GroundTexture2.loadFromFile("MainSprites/ground/groundtiles_0006_Layer-9.png");
-    GroundTexture2.setRepeated(true);
+    /** Load Level */
+    Level level;
+    level.loadFromJson(World, "./levels/level1.json");
+
+    /** Load Fonts */
+    font.loadFromFile("etc/FreeMono.ttf");
 
 
     sf::Texture BoxTexture;
@@ -61,8 +61,14 @@ int main()
     int mystupidchecker = 1;
 
     emitter particles = emitter(1000);
+
+    sf::Clock clock;
+
     while (Window.isOpen())
     {
+        sf::Time timeSinceLastFrame = clock.getElapsedTime();
+        clock.restart();
+        float fps =  1 / (timeSinceLastFrame.asSeconds());
 
         World.Step(1/60.f, 8, 3);
         int darkness = player.body->GetPosition().y*3.f;
@@ -77,29 +83,7 @@ int main()
         view.setCenter(player.body->GetPosition().x * SCALE, player.body->GetPosition().y * SCALE);
         Window.setView(view);
 
-        sf::Sprite ground;
-        ground.setTexture(GroundTexture);
-        ground.setPosition(140.f,250.f);
-        sf::Rect<int> groundrect = sf::Rect<int>(0,0,120,60);
-        ground.setTextureRect(groundrect);
-        Window.draw(ground);
-
-        ground.setTexture(GroundTexture);
-        ground.setPosition(0.f,800.f);
-        sf::Rect<int> groundrect2 = sf::Rect<int>(0,0,1600,60);
-        ground.setTextureRect(groundrect2);
-        Window.draw(ground);
-
-        ground.setTexture(GroundTexture);
-        ground.setPosition(240.f,500.f);
-        ground.setTextureRect(groundrect);
-        Window.draw(ground);
-
-
-        ground.setTexture(GroundTexture2);
-        ground.setPosition(0.f,860.f);
-        ground.setTextureRect(groundrect2);
-        Window.draw(ground);
+        level.draw(Window);
 
         for (b2Body* b = World.GetBodyList(); b; b = b->GetNext()) {
           Entity* cur;
@@ -125,7 +109,7 @@ int main()
         // std::cout << player.body->GetPosition().x << std::endl;
         // std::cout << blueguy.body->GetPosition().x << std::endl;
         // std::cout << b2Distance(player.body->GetPosition(),blueguy.body->GetPosition()) << std::endl;
-        debugPrints(Window, view);
+        debugPrints(Window, view, fps);
         handleInput(World, player, Window);
         Window.display();
     }
@@ -133,7 +117,7 @@ int main()
 		return 0;
 }
 
-void handleInput(b2World& World, Player player, sf::RenderWindow &Window) {
+void handleInput(b2World& World, Player &player, sf::RenderWindow &Window) {
   if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
   {
       if (counter>60) {
@@ -144,14 +128,14 @@ void handleInput(b2World& World, Player player, sf::RenderWindow &Window) {
 }
 //WILL EXECUTE EVERY TIME THE COUNTER MEETS THE IF CONDITION
 //PUSH 'D' TO DISABLE/ENABLE
-void debugPrints(sf::RenderWindow &Window, sf::View view) {
+void debugPrints(sf::RenderWindow &Window, sf::View view, float fps) {
 
-  sf::Font font;
-  font.loadFromFile("etc/FreeMono.ttf");
   sf::Text text;
   text.setFont(font);
-  text.setColor(sf::Color::Black);
-  text.setString("test");
+  text.setColor(sf::Color::Magenta);
+  std::stringstream ss (std::stringstream::in | std::stringstream::out);
+  ss << "fps: " << fps;
+  text.setString(ss.str());
   text.setPosition(view.getCenter().x-view.getSize().x/2,view.getCenter().y-view.getSize().y/2);
   Window.draw(text);
   // if (counter>60) {
@@ -178,36 +162,4 @@ void debugPrints(sf::RenderWindow &Window, sf::View view) {
   //   std::cout << "CATCH    = " << ((state&CATCH) ? "True" : "False") << std::endl;
   //   std::cout << "RETURN   = " << ((state&RETURN) ? "True" : "False") << "\n\n" << std::endl;
   // }
-}
-
-
-void CreateBox(b2World& World, int MouseX, int MouseY)
-{
-    b2BodyDef BodyDef;
-    BodyDef.position = b2Vec2(MouseX/SCALE, MouseY/SCALE);
-    BodyDef.type = b2_dynamicBody;
-    b2Body* Body = World.CreateBody(&BodyDef);
-
-    b2PolygonShape Shape;
-    Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
-    b2FixtureDef FixtureDef;
-    FixtureDef.density = 1.f;
-    FixtureDef.friction = 0.7f;
-    FixtureDef.shape = &Shape;
-    Body->CreateFixture(&FixtureDef);
-}
-
-void CreateGround(b2World& World, float X, float Y, float width, float height)
-{
-    b2BodyDef BodyDef;
-    BodyDef.position = b2Vec2(X/SCALE, Y/SCALE);
-    BodyDef.type = b2_staticBody;
-    b2Body* Body = World.CreateBody(&BodyDef);
-
-    b2PolygonShape Shape;
-    Shape.SetAsBox((width/2)/SCALE, (height/2)/SCALE);
-    b2FixtureDef FixtureDef;
-    FixtureDef.density = 0.f;
-    FixtureDef.shape = &Shape;
-    Body->CreateFixture(&FixtureDef);
 }
