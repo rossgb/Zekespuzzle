@@ -4,7 +4,9 @@
 
 static const float SCALE = 30.f;
 
-Player::Player(b2World& World) {
+Player::Player(b2World& World, particlesystem* particlesys) {
+  ps = particlesys;
+
   hoopfront.loadFromFile("MainSprites/basic/hoopfront.png");
   hoopback.loadFromFile("MainSprites/basic/hoopback.png");
   hoopflat.loadFromFile("MainSprites/basic/hoopflat.png");
@@ -39,8 +41,8 @@ Player::Player(b2World& World) {
 
   hoop = new Hoop(World);
 
-
   b2PolygonShape Shape;
+
   Shape.SetAsBox((32.f/2)/SCALE, (32.f/2)/SCALE);
   b2FixtureDef FixtureDef;
   FixtureDef.density = 1.f;
@@ -187,9 +189,18 @@ void Player::handlePhysics() {
     if (!(state&NOVA) && state & C) {
         if (!(state & JUMP1)) {
             state |= JUMP1;
+                std::cout << "test" <<std::endl;
+                emitter particless = emitter(70,700,700,3);
+
+                particless.setEmitter(body->GetPosition().x*30,body->GetPosition().y*30+15);
+                ps->add(particless);
             this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
             this->body->ApplyLinearImpulse( b2Vec2(0,-16), this->body->GetWorldCenter());
         } else if (!(state & JUMP2) && state & JUMPED) {
+          emitter particless = emitter(70,700,700,1);
+
+          particless.setEmitter(body->GetPosition().x*30,body->GetPosition().y*30+5);
+          ps->add(particless);
             state -= JUMPED;
             state |= JUMP2;
             this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
