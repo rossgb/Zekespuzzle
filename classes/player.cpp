@@ -138,6 +138,10 @@ void Player::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fix
 
 
   }
+
+  if (Orb* orb = dynamic_cast<Orb*>(other)) {
+    
+  }
 }
 
 
@@ -145,8 +149,16 @@ void Player::handlePhysics() {
 
     //if the velocity hits zero and the character is in the air, ground and add a jump
     if (this->body->GetLinearVelocity().y == 0) {
+      if (state&INAIR) {
+        emitter particless = emitter(7,700,700,1);
+        particless.setEmitter(body->GetPosition().x*30,body->GetPosition().y*30+15);
+        ps->add(particless);
+      }
+
         state |= INAIR;
         state -= INAIR;
+
+
 
         //reset all jumps
         state |= JUMP1;
@@ -188,23 +200,24 @@ void Player::handlePhysics() {
         //second jump
     if (!(state&NOVA) && state & C) {
         if (!(state & JUMP1)) {
-            state |= JUMP1;
-                std::cout << "test" <<std::endl;
-                emitter particless = emitter(70,700,700,3);
+          state |= JUMP1;
 
-                particless.setEmitter(body->GetPosition().x*30,body->GetPosition().y*30+15);
-                ps->add(particless);
-            this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
-            this->body->ApplyLinearImpulse( b2Vec2(0,-16), this->body->GetWorldCenter());
-        } else if (!(state & JUMP2) && state & JUMPED) {
-          emitter particless = emitter(70,700,700,1);
-
-          particless.setEmitter(body->GetPosition().x*30,body->GetPosition().y*30+5);
+          emitter particless = emitter(7,700,700,1);
+          particless.setEmitter(body->GetPosition().x*30,body->GetPosition().y*30+15);
           ps->add(particless);
-            state -= JUMPED;
-            state |= JUMP2;
-            this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
-            this->body->ApplyLinearImpulse( b2Vec2(0,-16), this->body->GetWorldCenter());
+
+          this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
+          this->body->ApplyLinearImpulse( b2Vec2(0,-16), this->body->GetWorldCenter());
+        } else if (!(state & JUMP2) && state & JUMPED) {
+
+          emitter particless = emitter(7,700,700,1);
+          particless.setEmitter(body->GetPosition().x*30,body->GetPosition().y*30+15);
+          ps->add(particless);
+
+          state -= JUMPED;
+          state |= JUMP2;
+          this->body->SetLinearVelocity(b2Vec2(this->body->GetLinearVelocity().x,-0.1));
+          this->body->ApplyLinearImpulse( b2Vec2(0,-16), this->body->GetWorldCenter());
         }
     }
 
