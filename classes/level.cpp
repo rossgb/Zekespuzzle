@@ -1,7 +1,7 @@
 #include "level.h"
 #include <fstream>
 #include <iostream>
-
+#include <regex>
 
 static const float SCALE = 30.f;
 
@@ -16,35 +16,43 @@ Level::Level()
 }
 Level::~Level() {}
 
-void Level::loadFromJson(b2World& World, std::string levelPath)
+void Level::loadFromLv(b2World& World, std::string levelPath)
 {
   std::cout << levelPath << std::endl;
   std::string line;
   std::ifstream myfile (levelPath);
   if (myfile.is_open())
   {
+    //current level object init
     while ( getline (myfile,line) )
     {
-      std::cout << line << '\n';
+      std::regex groundRegex("(ground),(.*),(.*),(.*),(.*),(.*)");
+      std::smatch groundObject;
+      if (std::regex_match(line,groundObject,groundRegex))
+      {
+        CreateGround(World, std::stof(groundObject[2].str()), stof(groundObject[3].str()), stof(groundObject[4].str()), stof(groundObject[5].str()));
+        GroundTexture.loadFromFile(groundObject[6]);
+        GroundTexture.setRepeated(true);
+
+      }
     }
     myfile.close();
   }
   else std::cout << "Unable to open file" << std::endl;
-
-  //@Ross, put this in the above loop
-  CreateGround(World, 600.f, 800.f, 1600.f, 16.f);
-  GroundTexture.loadFromFile("MainSprites/ground/groundtiles_0001_Layer-6.png");
-  GroundTexture.setRepeated(true);
 }
 
-void Level::draw(sf::RenderWindow &Window)
+void Level::draw(sf::RenderWindow &Window, b2World& World)
 {
-  sf::Sprite ground;
-  ground.setTexture(GroundTexture);
-  ground.setPosition(0.f,800.f);
-  sf::Rect<int> groundrect2 = sf::Rect<int>(0,0,1600,60);
-  ground.setTextureRect(groundrect2);
-  Window.draw(ground);
+  for (int i = 0; i < grounds.size(); i++)
+  {
+    sf::Sprite ground;
+    ground.setTexture(GroundTexture);
+    ground.setPosition(grounds[i].x,grounds[i].y);
+    sf::Rect<int> groundrect2 = sf::Rect<int>(0,0,grounds[i].width,60);
+    ground.setTextureRect(groundrect2);
+    Window.draw(ground);
+  }
+
 }
 
 void Level::CreateGround(b2World& World, float X, float Y, float width, float height)
@@ -60,4 +68,12 @@ void Level::CreateGround(b2World& World, float X, float Y, float width, float he
     FixtureDef.density = 0.f;
     FixtureDef.shape = &Shape;
     Body->CreateFixture(&FixtureDef);
+
+    //add it to our list of ground structs
+    Ground g;
+    g.x = X - width/2;
+    g.y = Y;
+    g.width = width;
+    g.height = height;
+    grounds.push_back(g);
 }
