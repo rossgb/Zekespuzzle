@@ -65,7 +65,7 @@ int main()
 
     // emitter particless = emitter(1000,500,500,-1);
 
-    // ps.add(particless);  
+    // ps.add(particless);
 
 
     sf::Clock clock;

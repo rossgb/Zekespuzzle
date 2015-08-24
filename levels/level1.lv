@@ -1,3 +1,4 @@
 level1:
 ground,600,800,1600,16,MainSprites/ground/groundtiles_0001_Layer-6.png
 ground,600,400,800,16,MainSprites/ground/groundtiles_0001_Layer-6.png
+ground,600,0,800,16,MainSprites/ground/groundtiles_0001_Layer-6.png

@@ -28,14 +28,23 @@ void Level::loadFromLv(b2World& World, std::string levelPath)
     {
       std::regex groundRegex("(ground),(.*),(.*),(.*),(.*),(.*)");
       std::smatch groundObject;
+
       if (std::regex_match(line,groundObject,groundRegex))
       {
+        std::cout <<  groundObject[5].str() << std::endl;
+
         CreateGround(World, std::stof(groundObject[2].str()), stof(groundObject[3].str()), stof(groundObject[4].str()), stof(groundObject[5].str()));
+        // CreateGround(World, 5, 5, 5, stof(groundObject[5].str()));
         GroundTexture.loadFromFile(groundObject[6]);
+
         GroundTexture.setRepeated(true);
 
       }
+
+
     }
+    std::cout << levelPath << std::endl;
+
     myfile.close();
   }
   else std::cout << "Unable to open file" << std::endl;
