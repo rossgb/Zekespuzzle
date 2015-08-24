@@ -8,6 +8,8 @@
 #include "animation.h"
 #include "entity.h"
 #include "blueguy.h"
+#include "particlesystem.h"
+#include "emitter.h"
 #include "hoop.h"
 
 enum StateMask {
@@ -37,13 +39,14 @@ enum StateMask {
 
 class Player: public Entity {
 public:
-  Player(b2World& World);
+  Player(b2World& World, particlesystem* particlesys);
   ~Player();
 
   void handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix);
 
   void update(sf::RenderWindow &Window);
 
+  particlesystem* ps;
   b2Body* body;
   Hoop* hoop;
   b2Fixture* hoopfx;

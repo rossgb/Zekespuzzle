@@ -6,12 +6,14 @@
 #include "blueguy.h"
 #include "listener.h"
 #include "emitter.h"
+#include "particlesystem.h"
 #include "level.h"
 
 /** We need this to easily convert between pixel and real-world coordinates*/
 static const float SCALE = 30.f;
 
 /** Create the base for the boxes to land */
+
 void CreateGround(b2World& World, float X, float Y, float width, float height);
 
 /** Create the boxes */
@@ -28,8 +30,9 @@ sf::Font font;
 int main()
 {
     /** Prepare the window */
-    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
-    sf::RenderWindow Window(sf::VideoMode(640, 480, 1), "Zeke");
+    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
+    // sf::RenderWindow Window(sf::VideoMode(640, 480, 1), "Zeke");
+
     Window.setFramerateLimit(60);
 		//Window.setKeyRepeatEnabled(false);
 
@@ -37,7 +40,6 @@ int main()
     view.setSize(sf::Vector2f(1080*1.5, 720*1.5));
 
     ContactListener listener;
-
     /** Prepare the world */
     b2Vec2 Gravity(0.f, 19.f);
     b2World World(Gravity, true);
@@ -53,14 +55,18 @@ int main()
 
 
     sf::Texture BoxTexture;
+    particlesystem ps = particlesystem(&Window);
 
-		Player player(World);
+		Player player(World, &ps);
 
     BlueGuy blueguy(World,player.body);
 
     int mystupidchecker = 1;
 
-    emitter particles = emitter(1000);
+    // emitter particless = emitter(1000,500,500,-1);
+
+    // ps.add(particless);  
+
 
     sf::Clock clock;
 
@@ -101,9 +107,12 @@ int main()
         counter++;
 
 
-        particles.update();
-        particles.setEmitter(player.body->GetPosition().x*30,player.body->GetPosition().y*30);
-        Window.draw(particles);
+
+        ps.update();
+        // particles.setEmitter(player.body->GetPosition().x*30,player.body->GetPosition().y*30);
+
+        // particles.update();
+        // Window.draw(particles);
 
 
         // std::cout << player.body->GetPosition().x << std::endl;
