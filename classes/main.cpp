@@ -46,7 +46,7 @@ int main()
 
     /** Load Level */
     Level level;
-    level.loadFromJson(World, "./levels/level1.json");
+    level.loadFromLv(World, "./levels/level1.lv");
 
     /** Load Fonts */
     font.loadFromFile("etc/FreeMono.ttf");
@@ -83,7 +83,7 @@ int main()
         view.setCenter(player.body->GetPosition().x * SCALE, player.body->GetPosition().y * SCALE);
         Window.setView(view);
 
-        level.draw(Window);
+        level.draw(Window, World);
 
         for (b2Body* b = World.GetBodyList(); b; b = b->GetNext()) {
           Entity* cur;
