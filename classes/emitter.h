@@ -31,7 +31,7 @@ public:
 
     emitter(unsigned int count, int x, int y, int repeat) :
     m_particles(count),
-    m_vertices(sf::Points, count),
+    m_vertices(sf::Quads, count*4),
     m_lifetime(30),
     m_emitter(x, y),
     offset(0,0)
@@ -91,12 +91,18 @@ public:
 
             // p.velocity.y += .1;
             // update the position of the corresponding vertex
-            m_vertices[i].position += p.velocity;
+            m_vertices[i*4].position += p.velocity;
+            m_vertices[i*4+1].position += p.velocity;
+            m_vertices[i*4+2].position += p.velocity;
+            m_vertices[i*4+3].position += p.velocity;
             // std::cout << p.velocity.x << std::endl;
 
             // update the alpha (transparency) of the particle according to its lifetime
             float ratio = (float)p.lifetime / (float)m_lifetime;
-            m_vertices[i].color.a = static_cast<sf::Uint8>(ratio * 255);
+            m_vertices[i*4].color.a = static_cast<sf::Uint8>(ratio * 255);
+            m_vertices[i*4+1].color.a = static_cast<sf::Uint8>(ratio * 255);
+            m_vertices[i*4+2].color.a = static_cast<sf::Uint8>(ratio * 255);
+            m_vertices[i*4+3].color.a = static_cast<sf::Uint8>(ratio * 255);
             // m_vertices[i].color.a = (40/50)*255;
 
         }
@@ -143,15 +149,22 @@ public:
         float angle = (std::rand() % 360) * 3.14f / 180.f;
         float speed = .4;
         // float speed = (std::rand() % 300)/100;
-        m_particles[index].velocity = sf::Vector2f(std::cos(angle) * speed, std::sin(angle) * speed);
+        m_particles[index].velocity = sf::Vector2f(std::cos(angle) * speed *3, std::sin(angle) * speed);
         m_particles[index].lifetime = m_lifetime;
         // m_particles[index].lifetime = m_lifetime - std::rand() % 60;
 
         // reset the position of the corresponding vertex
+        int quadsize = 5;
         int x = std::rand() % 10;
         int y = std::rand() % 10;
-        m_vertices[index].position.x = m_emitter.x+x;
-        m_vertices[index].position.y = m_emitter.y+y;
+        m_vertices[index*4].position.x = m_emitter.x+x + quadsize;
+        m_vertices[index*4].position.y = m_emitter.y+y + quadsize;
+        m_vertices[index*4+1].position.x = m_emitter.x+x +quadsize;
+        m_vertices[index*4+1].position.y = m_emitter.y+y -quadsize;
+        m_vertices[index*4+2].position.x = m_emitter.x+x -quadsize;
+        m_vertices[index*4+2].position.y = m_emitter.y+y -quadsize;
+        m_vertices[index*4+3].position.x = m_emitter.x+x -quadsize;
+        m_vertices[index*4+3].position.y = m_emitter.y+y +quadsize;
     }
 
     //offset from the center of the bodies position
