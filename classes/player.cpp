@@ -126,10 +126,21 @@ void Player::update(sf::RenderWindow &Window) {
 
 }
 
+void Player::handleGroundCollision(int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
+  if (begin == 1 && this->body->GetLinearVelocity().y < 0) {
+    bodyfx->SetSensor(true);
+  } else if (begin == 0) {
+    bodyfx->SetSensor(false);
+  }
+}
+
+
 void Player::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
   // body->ApplyLinearImpulse(b2Vec2(0,-100), body->GetWorldCenter());
+  std::cout <<"wut"<< std::endl;
+
   if (BlueGuy* bg = dynamic_cast<BlueGuy*>(other)) {
-      std::cout << "GOT HURT" <<std::endl;
+      // std::cout << "GOT HURT" <<std::endl;
       if (canBeDamaged && !(bg->state&BDIE)) {
         body->ApplyLinearImpulse(b2Vec2(-body->GetLinearVelocity().x-facing*7,-body->GetLinearVelocity().y-5), body->GetWorldCenter());
         health -= 20;
@@ -137,11 +148,20 @@ void Player::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fix
       }
 
 
+  } else if (Orb* orb = dynamic_cast<Orb*>(other)) {
+
+  } else {
+
   }
 
-  if (Orb* orb = dynamic_cast<Orb*>(other)) {
-    
-  }
+//dammit
+  // if (begin == 1 && body->GetLinearVelocity().y > 0) {
+  //   bodyfx->SetSensor(true);
+  // } else if (begin == 0) {
+  //   bodyfx->SetSensor(false);
+  // }
+  //god fucking dammit
+  //so the collisions are only handled if the colliding thing is an object, we'll have to do it o
 }
 
 

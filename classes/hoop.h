@@ -1,6 +1,6 @@
 #ifndef HOOP_H
 #define HOOP_H
-#endif
+
 
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
@@ -17,6 +17,7 @@ public:
   ~Hoop();
 
   void handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix);
+  void handleGroundCollision(int begin, b2Fixture* thisFix, b2Fixture* otherFix);
 
   void update(sf::RenderWindow &Window);
 
@@ -28,3 +29,4 @@ private:
 
 
 };
+#endif

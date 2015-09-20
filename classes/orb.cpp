@@ -66,3 +66,7 @@ sprite.setPosition(SCALE * this->body->GetPosition().x, SCALE * this->body->GetP
 void Orb::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
 
 }
+
+void Orb::handleGroundCollision(int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
+
+}

@@ -30,8 +30,8 @@ sf::Font font;
 int main()
 {
     /** Prepare the window */
-    sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
-    // sf::RenderWindow Window(sf::VideoMode(640, 480, 1), "Zeke");
+    // sf::RenderWindow Window(sf::VideoMode(1080, 720, 1), "Zeke", sf::Style::Fullscreen);
+    sf::RenderWindow Window(sf::VideoMode(640, 480, 1), "Zeke");
 
     Window.setFramerateLimit(60);
 		//Window.setKeyRepeatEnabled(false);

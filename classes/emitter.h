@@ -38,7 +38,7 @@ public:
     {
       pos= NULL;
       repeatdur = repeat*count +1;
-      std::cout << repeatdur << std::endl;
+      // std::cout << repeatdur << std::endl;
 
       for (std::size_t i = 0; i < m_particles.size(); ++i)
       {

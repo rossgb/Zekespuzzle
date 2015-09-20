@@ -1,6 +1,5 @@
 #ifndef PLAYER_H
 #define PLAYER_H
-#endif
 
 #include <Box2D/Box2D.h>
 #include <SFML/Graphics.hpp>
@@ -43,6 +42,7 @@ public:
   ~Player();
 
   void handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix);
+  void handleGroundCollision(int begin, b2Fixture* thisFix, b2Fixture* otherFix);
 
   void update(sf::RenderWindow &Window);
 
@@ -105,3 +105,4 @@ private:
   int* numFootContacts;
 
 };
+#endif

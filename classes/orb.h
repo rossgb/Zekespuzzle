@@ -17,6 +17,7 @@ public:
   ~Orb();
 
   void handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix);
+  void handleGroundCollision(int begin, b2Fixture* thisFix, b2Fixture* otherFix);
 
   void update(sf::RenderWindow &Window);
 

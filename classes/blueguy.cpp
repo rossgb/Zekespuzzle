@@ -70,6 +70,10 @@ void BlueGuy::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fi
 
 }
 
+void BlueGuy::handleGroundCollision(int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
+
+}
+
 
 void BlueGuy::handleState() {
   if (b2Distance(player->GetPosition(),body->GetPosition())<8) {

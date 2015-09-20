@@ -6,6 +6,19 @@
 #include <string>
 #include <vector>
 
+enum GroudType {
+    LEFTPLAT      = 0x1,
+    RIGHTPLAT      = 0x2,
+    CENTER     = 0x4,
+    LEFTDIRT        = 0x8,
+    RIGHTDIRT      = 0x10,
+    CENTERDIRT     = 0x20,
+    LEFTFLOAT     = 0x40,
+    RIGHTFLOAT = 0x80,
+    CENTERFLOAT    = 0x100
+
+};
+
 struct Ground
 {
   float x;

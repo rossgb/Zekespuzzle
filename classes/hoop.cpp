@@ -19,7 +19,7 @@ Hoop::Hoop(b2World& World) {
   body->SetUserData(this);
 
 
-  
+
 
 
 }
@@ -32,10 +32,14 @@ void Hoop::update(sf::RenderWindow &Window) {
 void Hoop::handleCollision(Entity* other, int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
   // body->ApplyLinearImpulse(b2Vec2(0,-100), body->GetWorldCenter());
   if (BlueGuy* bg = dynamic_cast<BlueGuy*>(other)) {
-      std::cout << "HIT THE DUDE" <<std::endl;
+      // std::cout << "HIT THE DUDE" <<std::endl;
       bg->body->ApplyLinearImpulse(b2Vec2(0,-10),bg->body->GetWorldCenter());
       bg->health--;
 
 
   }
+}
+
+void Hoop::handleGroundCollision(int begin, b2Fixture* thisFix, b2Fixture* otherFix) {
+
 }
